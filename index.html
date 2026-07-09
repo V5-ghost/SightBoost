@@ -397,7 +397,1430 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
       <div class="page" id="page-archive">
         <div class="sec-hdr"><div class="sec-title">Archives</div></div>
         <div id="archive-list"></div>
+      </div><!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NeoOps</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#8eb69b;--bg2:#0b2b26;--bg3:#0b2b26;--bg4:#8eb69b;
+--cyan:#32ae7e;--cyan2:#00b8d4;--cyan3:rgba(0,229,255,0.08);
+--green:#00e676;--green2:rgba(0,230,118,0.08);
+--red:#ff1744;--red2:rgba(255,23,68,0.08);
+--amber:#ffd740;--amber2:rgba(255,215,64,0.08);
+--text:#e0e0e0;--text2:#ffffff;--text3:#ffffff;
+--border:rgba(255,255,255,0.07);--border2:rgba(0,229,255,0.2);
+}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;min-height:100vh;overflow-x:hidden}
+
+/* WELCOME */
+#welcome{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+#welcome.gone{display:none}
+.w-logo{font-family:'Orbitron',monospace;font-size:52px;font-weight:700;color:var(--cyan);letter-spacing:8px;text-shadow:0 0 40px rgba(0,229,255,0.3);user-select:none;margin-bottom:8px}
+.w-logo span{color:rgba(255,255,255,0.15)}
+.w-upload{width:260px;min-height:90px;border:1px dashed rgba(0,229,255,0.25);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;margin-bottom:20px;cursor:pointer;transition:all 0.2s;padding:10px}
+.w-upload:hover{border-color:rgba(0,229,255,0.6);background:rgba(0,229,255,0.04)}
+.w-upload img{max-width:160px;max-height:80px;object-fit:contain;border-radius:3px}
+.w-upload-hint{font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase}
+#logo-input{display:none}
+.w-org{font-size:16px;font-family:'Orbitron',monospace;color:var(--text);letter-spacing:2px;outline:none;cursor:pointer;border-bottom:1px solid transparent;transition:border 0.2s;text-align:center;min-width:200px;margin-bottom:4px;margin-top:4px}
+.w-org:focus{border-bottom-color:var(--cyan);color:var(--cyan)}
+.w-motto{font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;outline:none;cursor:pointer;border-bottom:1px dashed transparent;transition:all 0.2s;text-align:center;min-width:200px;margin-bottom:28px}
+.w-motto:focus{color:var(--text2);border-bottom-color:var(--text3)}
+.w-btn{font-family:'Orbitron',monospace;font-size:12px;letter-spacing:3px;color:#000;background:var(--cyan);border:none;padding:14px 40px;border-radius:3px;cursor:pointer;font-weight:700;transition:all 0.2s}
+.w-btn:hover{background:var(--cyan2)}
+.w-btn:disabled{opacity:0.5;cursor:not-allowed}
+.w-status{font-size:10px;color:var(--text3);letter-spacing:1px;margin-top:12px;min-height:16px}
+
+/* APP */
+.app{display:flex;height:100vh;position:relative}
+.app.gone{display:none}
+
+/* SIDEBAR */
+.sidebar{width:200px;min-width:200px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.s-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.s-logo-name{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:var(--cyan);letter-spacing:2px}
+.s-logo-sub{font-size:9px;color:var(--text2);letter-spacing:3px;margin-top:2px;text-transform:uppercase}
+.nav-root{flex:1;padding:12px 0;display:flex;flex-direction:column}
+.nav-root.gone{display:none}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;color:var(--text2);font-size:12px;letter-spacing:0.5px;transition:all 0.15s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.arr{margin-left:auto;font-size:14px;opacity:0.3}
+.nav-drilled{flex:1;display:none;flex-direction:column}
+.nav-drilled.show{display:flex}
+.nav-back{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;color:var(--text3);font-size:11px;border-bottom:1px solid var(--border);transition:all 0.15s;flex-shrink:0}
+.nav-back:hover{color:var(--cyan)}
+.nav-back svg{width:14px;height:14px}
+.nav-section-title{padding:14px 16px 8px;font-size:9px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;font-family:'Orbitron',monospace;flex-shrink:0}
+.nav-sub{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--text2);font-size:12px;transition:all 0.15s;border-left:2px solid transparent}
+.nav-sub:hover{color:var(--text);background:var(--bg3)}
+.nav-sub.active{color:var(--cyan);background:var(--cyan3);border-left-color:var(--cyan)}
+.nav-sub svg{width:14px;height:14px;flex-shrink:0}
+.s-footer{padding:10px 16px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);flex-shrink:0;display:flex;align-items:center;gap:6px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;transition:background 0.3s}
+.sync-dot.synced{background:var(--green)}
+.sync-dot.offline{background:var(--red)}
+
+/* MAIN */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.topbar-title{font-family:'Orbitron',monospace;font-size:12px;color:var(--cyan);letter-spacing:2px;flex:1}
+.sw{display:flex;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:6px 10px;gap:8px;width:220px}
+.sw input{background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:12px;width:100%}
+.sw input::placeholder{color:var(--text3)}
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* COMPONENTS */
+.btn{background:none;border:1px solid var(--border2);color:var(--cyan);font-family:inherit;font-size:11px;padding:6px 12px;border-radius:3px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s}
+.btn:hover{background:var(--cyan3)}
+.btn-sm{padding:4px 8px;font-size:10px}
+.btn-solid{background:var(--cyan);color:#000;border-color:var(--cyan);font-weight:700}
+.btn-solid:hover{background:var(--cyan2)}
+.btn-red{border-color:rgba(255,23,68,0.4);color:var(--red)}
+.btn-red:hover{background:var(--red2)}
+.btn-green{border-color:rgba(0,230,118,0.4);color:var(--green)}
+.btn-green:hover{background:var(--green2)}
+.btn-amber{border-color:rgba(255,215,64,0.4);color:var(--amber)}
+.btn-amber:hover{background:var(--amber2)}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:14px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:10px;letter-spacing:2px;color:var(--text2);text-transform:uppercase}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px}
+.stat.click{cursor:pointer;transition:border 0.15s}
+.stat.click:hover{border-color:var(--border2)}
+.stat-lbl{font-size:10px;letter-spacing:1.5px;color:var(--text2);text-transform:uppercase;margin-bottom:6px}
+.stat-val{font-size:26px;font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;font-weight:700;font-variant-numeric:normal;font-feature-settings:'zero' off}
+.stat-sub{font-size:10px;color:var(--text2);margin-top:4px}
+.cyan{color:var(--cyan)}.green{color:var(--green)}.red{color:var(--red)}.amber{color:var(--amber)}
+.cat-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.cat-tab{padding:5px 12px;border:1px solid var(--border);border-radius:3px;font-size:11px;cursor:pointer;color:var(--text2);transition:all 0.15s}
+.cat-tab:hover{color:var(--text)}
+.cat-tab.active{border-color:var(--cyan);color:var(--cyan);background:var(--cyan3)}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px}
+.prod-card{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:14px;cursor:pointer;transition:all 0.15s;position:relative}
+.prod-card:hover{border-color:var(--border2);background:var(--bg4)}
+.prod-card.low{border-color:rgba(255,23,68,0.3)}
+.prod-card.low::before{content:'LOW';position:absolute;top:8px;right:8px;font-size:8px;color:var(--red);background:var(--red2);padding:2px 5px;border-radius:2px;letter-spacing:1px}
+.prod-name{font-size:12px;font-weight:500;margin-bottom:3px}
+.prod-cat{font-size:10px;color:var(--text2);margin-bottom:6px}
+.prod-qty{font-family:'Segoe UI',Arial,sans-serif;font-size:22px;font-weight:700;color:var(--cyan);font-variant-numeric:normal;font-feature-settings:'zero' off}
+.prod-price{font-size:10px;color:var(--amber);margin-top:2px}
+.prod-unit{font-size:9px;color:var(--text3)}
+.prog{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:8px}
+.prog-fill{height:100%;border-radius:2px;transition:width 0.3s}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:10px;letter-spacing:1.5px;color:var(--text2);text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left}
+.tbl td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;vertical-align:middle}
+.tbl tr:hover td{background:var(--bg3)}
+.tbl tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:500}
+.badge-green{background:var(--green2);color:var(--green);border:1px solid rgba(0,230,118,0.2)}
+.badge-red{background:var(--red2);color:var(--red);border:1px solid rgba(255,23,68,0.2)}
+.badge-gray{background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid var(--border)}
+.badge-cyan{background:var(--cyan3);color:var(--cyan);border:1px solid rgba(0,229,255,0.2)}
+.sort-btns{display:flex;gap:6px}
+.sort-btn{padding:4px 8px;border:1px solid var(--border);border-radius:2px;font-size:10px;color:var(--text2);cursor:pointer;background:none;font-family:inherit;transition:all 0.15s}
+.sort-btn.active{border-color:var(--cyan);color:var(--cyan);background:var(--cyan3)}
+.log-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.log-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.batch-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;margin-bottom:6px}
+.batch-name{font-family:'Orbitron',monospace;color:var(--cyan);min-width:120px;font-size:10px}
+.empty{text-align:center;padding:40px;color:var(--text3);font-size:12px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sec-title{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;color:var(--cyan)}
+.page{display:none}
+.page.active{display:block;animation:fadeIn 0.18s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* OVERLAYS */
+.overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:24px;width:460px;max-height:85vh;overflow-y:auto}
+.modal-sm{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:24px;width:340px}
+.modal-title{font-family:'Orbitron',monospace;font-size:12px;color:var(--cyan);letter-spacing:2px;margin-bottom:18px}
+.fr{margin-bottom:14px}
+.fl{font-size:10px;letter-spacing:1.5px;color:var(--text2);text-transform:uppercase;margin-bottom:6px;display:block}
+.fi{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:8px 10px;color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:border 0.15s}
+.fi:focus{border-color:var(--cyan)}
+.fi-sel{appearance:none;cursor:pointer}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.f-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+.ac-wrap{position:relative}
+.ac-drop{position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;z-index:50;max-height:180px;overflow-y:auto;margin-top:2px;display:none}
+.ac-item{padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border)}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.hi{background:var(--cyan3);color:var(--cyan)}
+.ac-sub{font-size:10px;color:var(--text2);margin-top:2px}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.toggle-lbl{font-size:11px;color:var(--text2)}
+.toggle{width:36px;height:20px;background:var(--bg4);border-radius:10px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0}
+.toggle.on{background:var(--cyan)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left 0.2s}
+.toggle.on::after{left:19px}
+.pw-row{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+/* INVOICE OVERLAY */
+#inv-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.88);z-index:600;display:none;flex-direction:column;align-items:center;padding:20px;overflow-y:auto}
+#inv-overlay.open{display:flex}
+.inv-actions{display:flex;gap:10px;margin-bottom:16px;width:100%;max-width:560px}
+#inv-box{background:#fff;color:#111;width:100%;max-width:560px;border-radius:4px;overflow:hidden}
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div id="welcome">
+  <div class="w-logo">NEO<span>OPS</span></div>
+  <div class="w-upload" id="logo-area">
+    <img id="logo-preview" style="display:none" alt="logo">
+    <div class="w-upload-hint" id="logo-hint">⊕ upload logo</div>
+    <input type="file" id="logo-input" accept="image/*">
+  </div>
+  <div class="w-org" id="w-org" contenteditable="false">Organisation</div>
+  <div class="w-motto" id="w-motto" contenteditable="false">your motto here</div>
+  <button class="w-btn" id="continue-btn" onclick="enterApp()">CONTINUE →</button>
+  <div class="w-status" id="w-status">connecting...</div>
+</div>
+
+<!-- APP -->
+<div class="app gone" id="app">
+
+  <div class="sidebar">
+    <div class="s-logo">
+      <div class="s-logo-name">NEO<span style="color:rgba(255,255,255,0.2)">OPS</span></div>
+      <div class="s-logo-sub">Inventory OS</div>
+    </div>
+
+    <!-- ROOT NAV -->
+    <div class="nav-root" id="nav-root">
+      <div class="nav-item" onclick="drillTo('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard<span class="arr">›</span>
       </div>
+      <div class="nav-item" onclick="drillTo('admin')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>
+        Admin<span class="arr">›</span>
+      </div>
+    </div>
+
+    <!-- DASHBOARD DRILLED -->
+    <div class="nav-drilled" id="drill-dashboard">
+      <div class="nav-back" onclick="goRoot()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </div>
+      <div class="nav-section-title">Dashboard</div>
+      <div class="nav-sub active" id="sub-overview" onclick="showPage('overview',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Overview
+      </div>
+      <div class="nav-sub" id="sub-products" onclick="showPage('products',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8L6 7h12l-2-4z"/></svg>
+        Products
+      </div>
+      <div class="nav-sub" id="sub-issuance" onclick="showPage('issuance',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 14l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Issue Stock
+      </div>
+      <div class="nav-sub" id="sub-sales" onclick="showPage('sales',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Sales
+      </div>
+      <div class="nav-sub" id="sub-invoices" onclick="showPage('invoices',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Invoices
+      </div>
+      <div class="nav-sub" id="sub-logs" onclick="showPage('logs',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Activity Log
+      </div>
+    </div>
+
+    <!-- ADMIN DRILLED -->
+    <div class="nav-drilled" id="drill-admin">
+      <div class="nav-back" onclick="goRoot()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </div>
+      <div class="nav-section-title">Admin</div>
+      <div class="nav-sub active" id="sub-settings" onclick="showPage('settings',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Settings
+      </div>
+      <div class="nav-sub" id="sub-archive" onclick="showPage('archive',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+        Archives
+      </div>
+      <div class="nav-sub" id="sub-passwords" onclick="tryPasswords()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Passwords
+      </div>
+    </div>
+
+    <div class="s-footer">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-lbl">connecting</span>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">OVERVIEW</div>
+      <div class="sw">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="search products..." id="gsearch" oninput="onGSearch(this.value)">
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- OVERVIEW -->
+      <div class="page active" id="page-overview">
+        <div class="grid4">
+          <div class="stat click" onclick="openBreakdown()">
+            <div class="stat-lbl">Total Products <span style="font-size:9px;color:var(--cyan)">↗</span></div>
+            <div class="stat-val cyan" id="s-total">0</div>
+            <div class="stat-sub" id="s-total-sub">all categories</div>
+          </div>
+          <div class="stat"><div class="stat-lbl">Low Stock</div><div class="stat-val red" id="s-low">0</div><div class="stat-sub">below reorder</div></div>
+          <div class="stat"><div class="stat-lbl">Categories</div><div class="stat-val amber" id="s-cats">0</div><div class="stat-sub">active</div></div>
+          <div class="stat"><div class="stat-lbl">Total Stock</div><div class="stat-val green" id="s-stock">0</div><div class="stat-sub" id="s-stock-sub">units</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title" id="cat-label">All Products</div>
+            <div class="sort-btns">
+              <button class="sort-btn active" onclick="setSort('name',this)">A-Z</button>
+              <button class="sort-btn" onclick="setSort('qty',this)">QTY</button>
+              <button class="sort-btn" onclick="setSort('expiry',this)">EXPIRY</button>
+            </div>
+          </div>
+          <div class="cat-tabs" id="cat-tabs"></div>
+          <div class="prod-grid" id="prod-grid"></div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="page" id="page-products">
+        <div class="sec-hdr">
+          <div class="sec-title">Products</div>
+          <div class="sw" style="width:180px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="prod-search" placeholder="filter..." oninput="renderProducts()" style="background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:12px;width:100%"></div>
+        </div>
+        <div class="card" style="margin:0"><table class="tbl"><thead><tr><th>Product</th><th>Category</th><th>Stock</th><th>Batches</th><th>Reorder</th><th>Status</th><th></th></tr></thead><tbody id="prod-tbody"></tbody></table></div>
+      </div>
+
+      <!-- ISSUE STOCK -->
+      <div class="page" id="page-issuance">
+        <div class="sec-hdr"><div class="sec-title">Issue Stock</div></div>
+        <div class="grid2" style="align-items:start">
+          <div class="card" style="margin:0">
+            <div class="card-hdr"><div class="card-title">New Issuance</div></div>
+            <div class="fr"><label class="fl">Product</label>
+              <div class="ac-wrap">
+                <div class="sw" style="width:100%"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="iss-input" placeholder="type product name..." oninput="issAcFilter()" onkeydown="issAcKey(event)" autocomplete="off" style="background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:12px;width:100%"></div>
+                <input type="hidden" id="iss-pid">
+                <div class="ac-drop" id="iss-drop"></div>
+              </div>
+            </div>
+            <div class="fr"><label class="fl">Batch</label><select class="fi fi-sel" id="iss-batch"><option value="">— select batch —</option></select></div>
+            <div class="fr"><label class="fl">Quantity</label><input class="fi" type="number" id="iss-qty" placeholder="0" min="1"></div>
+            <div class="fr"><label class="fl">Issued To</label>
+              <select class="fi fi-sel" id="iss-dept" onchange="handleDeptChange()" style="margin-bottom:6px"><option value="">— select department —</option></select>
+              <input class="fi" type="text" id="iss-other" placeholder="specify..." style="display:none;margin-top:6px">
+            </div>
+            <button class="btn btn-solid" style="width:100%" onclick="doIssue()">ISSUE STOCK</button>
+          </div>
+          <div class="card" style="margin:0"><div class="card-hdr"><div class="card-title">Recent Issuances</div></div><div id="iss-log"></div></div>
+        </div>
+      </div>
+
+      <!-- SALES -->
+      <div class="page" id="page-sales">
+        <div class="sec-hdr">
+          <div class="sec-title">Sales</div>
+          <div class="sw" style="width:200px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="sales-search" placeholder="search client..." oninput="renderSales()" style="background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:12px;width:100%"></div>
+        </div>
+        <div id="sales-body"></div>
+      </div>
+
+      <!-- INVOICES -->
+      <div class="page" id="page-invoices">
+        <div class="sec-hdr">
+          <div class="sec-title">Past Invoices</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="sw" style="width:200px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="inv-search" placeholder="name or invoice no..." oninput="renderInvoices()" style="background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:12px;width:100%"></div>
+            <span id="inv-count" style="font-size:11px;color:var(--text3)"></span>
+          </div>
+        </div>
+        <div id="inv-list"></div>
+      </div>
+
+      <!-- LOGS -->
+      <div class="page" id="page-logs">
+        <div class="sec-hdr">
+          <div class="sec-title">Activity Log</div>
+          <span id="log-count" style="font-size:11px;color:var(--text3)"></span>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:14px" id="log-tabs">
+          <button class="sort-btn active" onclick="setLogFilter('all',this)">All</button>
+          <button class="sort-btn" onclick="setLogFilter('sale',this)">Sales</button>
+          <button class="sort-btn" onclick="setLogFilter('issue',this)">Issuances</button>
+          <button class="sort-btn" onclick="setLogFilter('product',this)">Products</button>
+          <button class="sort-btn" onclick="setLogFilter('invoice',this)">Invoices</button>
+        </div>
+        <div class="card" style="margin:0"><div id="log-list"></div></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="sec-hdr"><div class="sec-title">Settings</div></div>
+        <div class="grid2" style="align-items:start">
+          <div>
+            <div class="card" style="margin-bottom:12px">
+              <div class="card-hdr"><div class="card-title">Categories</div></div>
+              <div style="display:flex;gap:8px;margin-bottom:12px"><input class="fi" type="text" id="new-cat" placeholder="new category..." style="flex:1"><button class="btn" onclick="addCat()">Add</button></div>
+              <div id="cat-list"></div>
+            </div>
+            <div class="card" style="margin:0">
+              <div class="card-hdr"><div class="card-title">Departments</div></div>
+              <div style="display:flex;gap:8px;margin-bottom:12px"><input class="fi" type="text" id="new-dept" placeholder="new department..." style="flex:1"><button class="btn" onclick="addDept()">Add</button></div>
+              <div id="dept-list"></div>
+            </div>
+          </div>
+          <div class="card" style="margin:0">
+            <div class="card-hdr"><div class="card-title">Add Product</div></div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Create a new product in the inventory.</p>
+            <button class="btn btn-solid" style="width:100%" onclick="openAddProd()">+ New Product</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARCHIVES -->
+      <div class="page" id="page-archive">
+        <div class="sec-hdr"><div class="sec-title">Archives</div></div>
+        <div id="archive-list"></div>
+      </div>
+
+      <!-- PASSWORDS -->
+      <div class="page" id="page-passwords">
+        <div class="sec-hdr"><div class="sec-title">Passwords</div></div>
+        <div id="pw-list"></div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <!-- DETAIL OVERLAY -->
+  <div class="overlay" id="detail-ov">
+    <div class="modal">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="modal-title" id="detail-title">Product</div>
+        <button class="btn btn-sm" onclick="closeOv('detail-ov')">✕</button>
+      </div>
+      <div id="detail-body"></div>
+    </div>
+  </div>
+
+  <!-- ADD/EDIT PRODUCT OVERLAY -->
+  <div class="overlay" id="prod-ov">
+    <div class="modal">
+      <div class="modal-title" id="prod-ov-title">ADD PRODUCT</div>
+      <input type="hidden" id="edit-id">
+      <div class="fr"><label class="fl">Product Name</label><input class="fi" type="text" id="f-name" placeholder="e.g. Rice 50kg"></div>
+      <div class="fr2">
+        <div><label class="fl">Category</label><select class="fi fi-sel" id="f-cat"></select></div>
+        <div><label class="fl">Cost Price (₦)</label><input class="fi" type="number" id="f-cost" placeholder="0"></div>
+      </div>
+      <div class="fr2">
+        <div><label class="fl">Retail Price (₦)</label><input class="fi" type="number" id="f-retail" placeholder="0"></div>
+        <div><label class="fl">Reorder Level</label><input class="fi" type="number" id="f-reorder" placeholder="0"></div>
+      </div>
+      <div class="fr2">
+        <div><label class="fl">Production Date</label><input class="fi" type="date" id="f-prod"></div>
+        <div><label class="fl">Expiry Date</label><input class="fi" type="date" id="f-exp"></div>
+      </div>
+      <div class="fr">
+        <div class="toggle-row">
+          <div class="toggle" id="markup-tog" onclick="toggleMarkup()"></div>
+          <span class="toggle-lbl">Auto markup retail from cost</span>
+          <span id="markup-prev" style="font-size:11px;color:var(--amber);margin-left:auto"></span>
+        </div>
+        <input class="fi" type="number" id="f-markup" placeholder="markup %" style="display:none" oninput="previewMarkup()">
+      </div>
+      <div class="fr"><label class="fl">Initial Batch Qty</label><input class="fi" type="number" id="f-qty" placeholder="units in first batch"></div>
+      <div class="f-actions">
+        <button class="btn" onclick="closeOv('prod-ov')">Cancel</button>
+        <button class="btn btn-solid" onclick="saveProd()">SAVE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SELL OVERLAY -->
+  <div class="overlay" id="sell-ov">
+    <div class="modal">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="modal-title" id="sell-title">SELL</div>
+        <button class="btn btn-sm" onclick="closeOv('sell-ov')">✕</button>
+      </div>
+      <div id="sell-body"></div>
+    </div>
+  </div>
+
+  <!-- PASSWORD GATE OVERLAY -->
+  <div class="overlay" id="gate-ov">
+    <div class="modal-sm">
+      <div class="modal-title" id="gate-title">LOCKED</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:14px" id="gate-sub">Enter password to continue</div>
+      <input class="fi" type="password" id="gate-input" placeholder="password..." onkeydown="if(event.key==='Enter')submitGate()">
+      <div id="gate-err" style="color:var(--red);font-size:11px;margin-top:8px;min-height:14px"></div>
+      <div class="f-actions">
+        <button class="btn" onclick="cancelGate()">Cancel</button>
+        <button class="btn btn-solid" onclick="submitGate()">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SET PASSWORD OVERLAY -->
+  <div class="overlay" id="setpw-ov">
+    <div class="modal-sm">
+      <div class="modal-title" id="setpw-title">SET PASSWORD</div>
+      <input type="hidden" id="setpw-section">
+      <div class="fr"><label class="fl">New Password</label><input class="fi" type="password" id="setpw-new" placeholder="enter password"></div>
+      <div class="fr"><label class="fl">Confirm</label><input class="fi" type="password" id="setpw-confirm" placeholder="repeat"></div>
+      <div id="setpw-err" style="color:var(--red);font-size:11px;min-height:14px"></div>
+      <div class="f-actions">
+        <button class="btn" onclick="closeOv('setpw-ov')">Cancel</button>
+        <button class="btn btn-solid" onclick="doSetPw()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREAKDOWN OVERLAY -->
+  <div class="overlay" id="bd-ov">
+    <div class="modal-sm" style="width:380px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="modal-title" id="bd-title">Stock Breakdown</div>
+        <button class="btn btn-sm" onclick="closeOv('bd-ov')">✕</button>
+      </div>
+      <div id="bd-body"></div>
+    </div>
+  </div>
+
+  <!-- INVOICE OVERLAY -->
+  <div id="inv-overlay">
+    <div class="inv-actions">
+      <button class="btn btn-solid" onclick="doPrint()">🖨 Print & Archive</button>
+      <button class="btn" onclick="closeInvoice()">✕ Close</button>
+    </div>
+    <div id="inv-box"></div>
+  </div>
+
+</div><!-- /app -->
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+const fbApp = initializeApp({
+  apiKey: "AIzaSyBlWG9dYC2WON4iZQVsu-qkDWX5ZM8Knu0",
+  authDomain: "sightboost-c400f.firebaseapp.com",
+  projectId: "sightboost-c400f",
+  storageBucket: "sightboost-c400f.firebasestorage.app",
+  messagingSenderId: "769353751763",
+  appId: "1:769353751763:web:c877364dbd7fb3e94f8826"
+});
+const FSdb = getFirestore(fbApp);
+const DOC  = doc(FSdb, "neoops", "data");
+
+// ── STATE ─────────────────────────────────────────────────────────
+let DB = {
+  products:[], categories:['Electronics','Clothing','Food','Beverages','Stationery'],
+  departments:[], passwords:{}, logs:[], sales:[], pastInvoices:[],
+  clients:[], orgName:'Organisation', orgMotto:'', orgLogo:null, invCounter:0
+};
+let gSearch='', currentCat='all', currentSort='name', logFilter='all';
+let adminUnlocked=false, gateResolve=null;
+let currentInvData=null, currentInvNo=null;
+let saveTimer=null;
+let issAcItems=[], issAcHi=-1;
+let clientAcItems=[], clientAcHi=-1;
+
+// ── FIREBASE ──────────────────────────────────────────────────────
+function setSyncUI(s){
+  const dot=document.getElementById('sync-dot');
+  const lbl=document.getElementById('sync-lbl');
+  if(s==='synced'){dot.className='sync-dot synced';lbl.textContent='synced';}
+  else if(s==='saving'){dot.style.background='var(--amber)';dot.className='sync-dot';lbl.textContent='saving...';}
+  else if(s==='offline'){dot.className='sync-dot offline';lbl.textContent='offline';}
+  else{dot.className='sync-dot';lbl.textContent='connecting';}
+}
+
+function saveDB(){
+  clearTimeout(saveTimer);
+  setSyncUI('saving');
+  saveTimer=setTimeout(async()=>{
+    try{ await setDoc(DOC,JSON.parse(JSON.stringify(DB))); setSyncUI('synced'); }
+    catch(e){ console.warn('Save error:',e); setSyncUI('offline'); }
+  },600);
+}
+
+async function initApp(){
+  setSyncUI('connecting');
+  try{
+    const snap=await getDoc(DOC);
+    if(snap.exists()){
+      DB=Object.assign(DB,snap.data());
+    }
+    setSyncUI('synced');
+  }catch(e){
+    console.warn('Load error:',e);
+    setSyncUI('offline');
+  }
+  // populate welcome from loaded data
+  document.getElementById('w-org').textContent=DB.orgName||'Organisation';
+  document.getElementById('w-motto').textContent=DB.orgMotto||'your motto here';
+  if(DB.orgLogo){
+    const img=document.getElementById('logo-preview');
+    img.src=DB.orgLogo; img.style.display='block';
+    document.getElementById('logo-hint').style.display='none';
+  }
+  document.getElementById('w-status').textContent='';
+  // real-time listener
+  onSnapshot(DOC,(snap)=>{
+    if(!snap.exists())return;
+    if(saveTimer)return;
+    DB=Object.assign({
+      products:[],categories:[],departments:[],passwords:{},logs:[],
+      sales:[],pastInvoices:[],clients:[],orgName:'Organisation',
+      orgMotto:'',orgLogo:null,invCounter:0
+    },snap.data());
+    setSyncUI('synced');
+    if(!document.getElementById('app').classList.contains('gone')){
+      renderCurrentPage();
+    }
+  },(err)=>{ setSyncUI('offline'); });
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const totalQty=p=>(p.batches||[]).reduce((a,b)=>a+b.qty,0);
+const isLow=p=>totalQty(p)<=(p.reorder||0);
+const fmtP=n=>(n&&n>0)?'₦'+Number(n).toLocaleString():'nil';
+const fmtT=iso=>{if(!iso)return'—';const d=new Date(iso);return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});};
+const fmtBatch=exp=>{
+  const d=exp?new Date(exp+'T00:00:00'):new Date();
+  return'Batch'+String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getFullYear()).slice(2);
+};
+const roundTo10=n=>Math.round(n/10)*10;
+function addLog(msg,type='info'){
+  if(!DB.logs)DB.logs=[];
+  DB.logs.unshift({id:uid(),msg,type,time:new Date().toISOString()});
+  if(DB.logs.length>300)DB.logs.pop();
+}
+const openOv=id=>document.getElementById(id).classList.add('open');
+const closeOv=id=>document.getElementById(id).classList.remove('open');
+window.closeOv=closeOv;
+
+// ── NAVIGATION ────────────────────────────────────────────────────
+async function drillTo(section){
+  if(section==='dashboard'&&DB.passwords&&DB.passwords['dashboard']){
+    const ok=await gateCheck('dashboard'); if(!ok)return;
+  }
+  if(section==='admin'&&DB.passwords&&DB.passwords['admin']&&!adminUnlocked){
+    const ok=await gateCheck('admin'); if(!ok)return;
+    adminUnlocked=true;
+  }
+  if(section==='admin')adminUnlocked=true;
+  document.getElementById('nav-root').classList.add('gone');
+  document.querySelectorAll('.nav-drilled').forEach(d=>d.classList.remove('show'));
+  document.getElementById('drill-'+section).classList.add('show');
+  if(section==='dashboard')showPage('overview',document.getElementById('sub-overview'));
+  if(section==='admin')showPage('settings',document.getElementById('sub-settings'));
+}
+window.drillTo=drillTo;
+
+function goRoot(){
+  adminUnlocked=false;
+  document.getElementById('nav-root').classList.remove('gone');
+  document.querySelectorAll('.nav-drilled').forEach(d=>d.classList.remove('show'));
+}
+window.goRoot=goRoot;
+
+function showPage(page,el){
+  document.querySelectorAll('.nav-sub').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const titles={overview:'OVERVIEW',products:'PRODUCTS',issuance:'ISSUE STOCK',sales:'SALES',invoices:'PAST INVOICES',logs:'ACTIVITY LOG',settings:'SETTINGS',archive:'ARCHIVES',passwords:'PASSWORDS'};
+  document.getElementById('page-title').textContent=titles[page]||page.toUpperCase();
+  renderPage(page);
+}
+window.showPage=showPage;
+
+function renderCurrentPage(){
+  const a=document.querySelector('.page.active');
+  if(a)renderPage(a.id.replace('page-',''));
+}
+function renderPage(p){
+  if(p==='overview')renderOverview();
+  else if(p==='products')renderProducts();
+  else if(p==='issuance')renderIssuance();
+  else if(p==='sales')renderSales();
+  else if(p==='invoices')renderInvoices();
+  else if(p==='logs')renderLogs();
+  else if(p==='settings')renderSettings();
+  else if(p==='archive')renderArchive();
+  else if(p==='passwords')renderPasswords();
+}
+
+// ── WELCOME ───────────────────────────────────────────────────────
+window.enterApp=function(){
+  DB.orgName=document.getElementById('w-org').textContent.trim()||'Organisation';
+  const m=document.getElementById('w-motto').textContent.trim();
+  if(m&&m!=='your motto here')DB.orgMotto=m;
+  saveDB();
+  document.getElementById('welcome').classList.add('gone');
+  document.getElementById('app').classList.remove('gone');
+  document.getElementById('nav-root').classList.add('gone');
+  document.getElementById('drill-dashboard').classList.add('show');
+  document.querySelectorAll('.nav-sub').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sub-overview').classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-overview').classList.add('active');
+  document.getElementById('page-title').textContent='OVERVIEW';
+  renderOverview();
+};
+
+// logo upload
+document.getElementById('logo-area').addEventListener('click',()=>document.getElementById('logo-input').click());
+document.getElementById('logo-input').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    DB.orgLogo=ev.target.result;
+    const img=document.getElementById('logo-preview');
+    img.src=DB.orgLogo; img.style.display='block';
+    document.getElementById('logo-hint').style.display='none';
+    saveDB();
+  };
+  r.readAsDataURL(f);
+});
+// editable org name & motto
+['w-org','w-motto'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener('click',()=>{el.contentEditable='true';el.focus();});
+  el.addEventListener('blur',()=>{
+    el.contentEditable='false';
+    if(id==='w-org'){DB.orgName=el.textContent.trim()||'Organisation';}
+    else{DB.orgMotto=el.textContent.trim();}
+    saveDB();
+  });
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el.blur();}});
+});
+
+// ── OVERVIEW ──────────────────────────────────────────────────────
+function renderOverview(){
+  const all=DB.products.filter(p=>!p.archived);
+  const isFiltered=currentCat!=='all';
+  const display=isFiltered?all.filter(p=>p.category===currentCat):all;
+  document.getElementById('s-total').textContent=display.length;
+  document.getElementById('s-total-sub').textContent=isFiltered?'in '+currentCat:'all categories';
+  document.getElementById('s-low').textContent=display.filter(isLow).length;
+  document.getElementById('s-cats').textContent=(DB.categories||[]).length;
+  document.getElementById('s-stock').textContent=display.reduce((a,p)=>a+totalQty(p),0);
+  document.getElementById('s-stock-sub').textContent=isFiltered?'units in '+currentCat:'units total';
+  document.getElementById('cat-label').textContent=isFiltered?currentCat+' Products':'All Products';
+
+  let tabs='<div class="cat-tab'+(currentCat==='all'?' active':'')+'" onclick="setCat(\'all\',this)">All</div>';
+  (DB.categories||[]).forEach(c=>{tabs+='<div class="cat-tab'+(currentCat===c?' active':'')+'" onclick="setCat(\''+c+'\',this)">'+c+'</div>';});
+  document.getElementById('cat-tabs').innerHTML=tabs;
+
+  let prods=display;
+  if(gSearch)prods=prods.filter(p=>p.name.toLowerCase().includes(gSearch));
+  if(currentSort==='name')prods.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(currentSort==='qty')prods.sort((a,b)=>totalQty(b)-totalQty(a));
+  else if(currentSort==='expiry')prods.sort((a,b)=>((a.batches&&a.batches[0]&&a.batches[0].expiry)||'9999').localeCompare((b.batches&&b.batches[0]&&b.batches[0].expiry)||'9999'));
+
+  const grid=document.getElementById('prod-grid');
+  if(!prods.length){grid.innerHTML='<div class="empty">no products found</div>';return;}
+  grid.innerHTML=prods.map(p=>{
+    const qty=totalQty(p);
+    const pct=p.reorder>0?Math.min(100,Math.round(qty/p.reorder*50)):100;
+    const fc=isLow(p)?'var(--red)':qty<p.reorder*2?'var(--amber)':'var(--cyan)';
+    const retail=p.retailPrice&&p.retailPrice>0?p.retailPrice:p.price;
+    return`<div class="prod-card${isLow(p)?' low':''}" onclick="openDetail('${p.id}')">
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-cat">${p.category}</div>
+      <div class="prod-qty">${qty}</div>
+      <div class="prod-price">${fmtP(retail)}</div>
+      <div class="prod-unit">${p.batches?p.batches.length:0} batch${(p.batches&&p.batches.length)!==1?'es':''}</div>
+      <div class="prog"><div class="prog-fill" style="width:${pct}%;background:${fc}"></div></div>
+    </div>`;
+  }).join('');
+}
+window.setCat=function(c,el){currentCat=c;document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderOverview();};
+window.setSort=function(s,el){currentSort=s;document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderOverview();};
+window.onGSearch=function(v){gSearch=v.toLowerCase();const a=document.querySelector('.page.active');if(a&&a.id==='page-overview')renderOverview();else if(a&&a.id==='page-products')renderProducts();};
+
+// ── BREAKDOWN ─────────────────────────────────────────────────────
+window.openBreakdown=function(){
+  const prods=DB.products.filter(p=>!p.archived&&(currentCat==='all'||p.category===currentCat));
+  const ins=prods.filter(p=>totalQty(p)>0);
+  const out=prods.filter(p=>totalQty(p)===0);
+  document.getElementById('bd-title').textContent=(currentCat!=='all'?currentCat+' ':'')+'Stock Breakdown';
+  document.getElementById('bd-body').innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
+    +'<div style="background:var(--bg3);padding:12px;border-radius:3px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:6px">IN STOCK</div><div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:28px;font-weight:700;color:var(--green)">'+ins.length+'</div><div style="font-size:10px;color:var(--text2)">products</div></div>'
+    +'<div style="background:var(--bg3);padding:12px;border-radius:3px;text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:6px">OUT OF STOCK</div><div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:28px;font-weight:700;color:var(--red)">'+out.length+'</div><div style="font-size:10px;color:var(--text2)">products</div></div></div>'
+    +(out.length?'<div style="font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Out of Stock</div>'+out.map(p=>'<div style="padding:6px 10px;background:var(--bg3);border-radius:3px;margin-bottom:4px;font-size:11px;display:flex;justify-content:space-between"><span>'+p.name+'</span><span style="color:var(--text2)">'+p.category+'</span></div>').join(''):'<div style="color:var(--text3);font-size:12px;text-align:center;padding:12px">All products have stock ✓</div>');
+  openOv('bd-ov');
+};
+
+// ── PRODUCTS PAGE ─────────────────────────────────────────────────
+function renderProducts(){
+  const q=(document.getElementById('prod-search').value||'').toLowerCase();
+  const prods=(DB.products||[]).filter(p=>!p.archived&&(!q||p.name.toLowerCase().includes(q)));
+  const tb=document.getElementById('prod-tbody');
+  if(!prods.length){tb.innerHTML='<tr><td colspan="7" class="empty">no products</td></tr>';return;}
+  tb.innerHTML=prods.map(p=>{
+    const qty=totalQty(p);const low=isLow(p);
+    return`<tr><td style="font-weight:500">${p.name}</td><td><span class="badge badge-gray">${p.category}</span></td><td><span style="font-family:'Segoe UI',Arial,sans-serif;font-weight:700;color:${low?'var(--red)':'var(--cyan)'}">${qty}</span></td><td>${(p.batches||[]).length}</td><td>${p.reorder||0}</td><td><span class="badge ${low?'badge-red':'badge-green'}">${low?'LOW':'OK'}</span></td><td><button class="btn btn-sm" onclick="openDetail('${p.id}')">View</button></td></tr>`;
+  }).join('');
+}
+
+// ── DETAIL ────────────────────────────────────────────────────────
+function openDetail(id){
+  const p=DB.products.find(x=>x.id===id);if(!p)return;
+  document.getElementById('detail-title').textContent=p.name;
+  const qty=totalQty(p);const low=isLow(p);
+  const retail=p.retailPrice&&p.retailPrice>0?p.retailPrice:p.price;
+  let h='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">'
+    +'<div style="background:var(--bg3);padding:10px;border-radius:3px"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">TOTAL STOCK</div><div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:20px;font-weight:700;color:var(--cyan)">'+qty+'</div></div>'
+    +'<div style="background:var(--bg3);padding:10px;border-radius:3px"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">REORDER</div><div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:20px;font-weight:700;color:'+(low?'var(--red)':'var(--amber)')+'">'+p.reorder+'</div></div>'
+    +'<div style="background:var(--bg3);padding:10px;border-radius:3px"><div style="font-size:10px;color:var(--text2);margin-bottom:4px">PRICE</div><div style="font-size:13px;font-weight:700;color:var(--amber)">'+fmtP(retail)+'</div></div>'
+    +'</div>';
+  h+='<div style="font-size:10px;letter-spacing:1.5px;color:var(--text2);margin-bottom:8px">BATCHES</div>';
+  h+='<div style="margin-bottom:12px">';
+  h+=(p.batches||[]).map(b=>'<div class="batch-row"><div class="batch-name">'+b.name+'</div><div style="font-size:12px;flex:1">'+b.qty+' units</div><div style="font-size:10px;color:var(--text2)">'+(b.expiry||'no expiry')+'</div>'
+    +'<button class="btn btn-sm btn-green" style="padding:2px 7px;font-size:13px" title="Add stock" onclick="promptAddBatch(\''+p.id+'\',\''+b.id+'\')">+</button>'
+    +'<button class="btn btn-sm btn-red" onclick="delBatch(\''+p.id+'\',\''+b.id+'\')">−</button>'
+    +'</div>').join('')||'<div style="color:var(--text3);font-size:12px;padding:8px 0">no batches</div>';
+  h+='</div>';
+  h+='<div style="background:var(--bg3);padding:10px;border-radius:3px;margin-bottom:14px">'
+    +'<div style="font-size:10px;color:var(--text2);margin-bottom:8px">ADD BATCH</div>'
+    +'<div style="display:flex;gap:6px"><input class="fi" type="number" id="nb-qty" placeholder="qty" style="width:80px"><input class="fi" type="date" id="nb-exp" style="flex:1"><button class="btn btn-sm btn-green" onclick="addBatch(\''+p.id+'\')">Add</button></div></div>';
+  h+='<div style="display:flex;gap:6px">'
+    +'<button class="btn btn-sm btn-solid" style="flex:1" onclick="openSell(\''+p.id+'\')">Sell</button>'
+    +'<button class="btn btn-sm" onclick="openEditProd(\''+p.id+'\')">Edit</button>'
+    +'<button class="btn btn-sm btn-amber" onclick="archiveProd(\''+p.id+'\')">Archive</button>'
+    +'</div>';
+  document.getElementById('detail-body').innerHTML=h;
+  openOv('detail-ov');
+}
+window.openDetail=openDetail;
+
+window.addBatch=function(pid){
+  const p=DB.products.find(x=>x.id===pid);
+  const qty=parseInt(document.getElementById('nb-qty').value);
+  const exp=document.getElementById('nb-exp').value;
+  if(!qty||qty<1)return;
+  if(!p.batches)p.batches=[];
+  p.batches.push({id:uid(),name:fmtBatch(exp),qty,expiry:exp||''});
+  addLog('Batch added to '+p.name+': '+qty+' units','green');
+  saveDB();openDetail(pid);renderCurrentPage();
+};
+
+window.promptAddBatch=function(pid,bid){
+  const p=DB.products.find(x=>x.id===pid);
+  const b=(p.batches||[]).find(x=>x.id===bid);
+  if(!b)return;
+  const v=prompt('Add stock to '+b.name+' ('+p.name+')\nCurrent: '+b.qty+' units\n\nEnter quantity to add:');
+  if(v===null)return;
+  const qty=parseInt(v);
+  if(!qty||qty<1){alert('Invalid quantity.');return;}
+  b.qty+=qty;
+  addLog('Added '+qty+' units to '+b.name+' of '+p.name,'green');
+  saveDB();openDetail(pid);renderCurrentPage();
+};
+
+window.delBatch=function(pid,bid){
+  const p=DB.products.find(x=>x.id===pid);
+  const b=(p.batches||[]).find(x=>x.id===bid);
+  if(!b)return;
+  if(!confirm('Delete '+b.name+' from '+p.name+'? ('+b.qty+' units)'))return;
+  p.batches=p.batches.filter(x=>x.id!==bid);
+  addLog('Batch removed from '+p.name,'red');
+  saveDB();openDetail(pid);renderCurrentPage();
+};
+
+window.archiveProd=function(id){
+  const p=DB.products.find(x=>x.id===id);
+  p.archived=true; p.archivedAt=new Date().toISOString();
+  addLog('Archived: '+p.name,'amber');
+  saveDB();closeOv('detail-ov');renderCurrentPage();
+};
+
+// ── ADD / EDIT PRODUCT ────────────────────────────────────────────
+function openAddProd(){
+  document.getElementById('edit-id').value='';
+  document.getElementById('prod-ov-title').textContent='ADD PRODUCT';
+  ['f-name','f-cost','f-retail','f-reorder','f-prod','f-exp','f-qty','f-markup'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('markup-tog').className='toggle';
+  document.getElementById('f-markup').style.display='none';
+  document.getElementById('markup-prev').textContent='';
+  popCatSel();
+  openOv('prod-ov');
+}
+window.openAddProd=openAddProd;
+
+async function openEditProd(id){
+  if(DB.passwords&&DB.passwords['admin']&&!adminUnlocked){
+    const ok=await gateCheck('admin'); if(!ok)return; adminUnlocked=true;
+  }
+  const p=DB.products.find(x=>x.id===id);
+  document.getElementById('edit-id').value=id;
+  document.getElementById('prod-ov-title').textContent='EDIT PRODUCT';
+  document.getElementById('f-name').value=p.name;
+  document.getElementById('f-cost').value=p.price||'';
+  document.getElementById('f-retail').value=p.retailPrice||'';
+  document.getElementById('f-reorder').value=p.reorder||'';
+  document.getElementById('markup-tog').className='toggle';
+  document.getElementById('f-markup').style.display='none';
+  document.getElementById('markup-prev').textContent='';
+  document.getElementById('f-qty').value='';
+  popCatSel(p.category);
+  closeOv('detail-ov');
+  openOv('prod-ov');
+}
+window.openEditProd=openEditProd;
+
+function popCatSel(sel){
+  document.getElementById('f-cat').innerHTML=(DB.categories||[]).map(c=>'<option'+(c===sel?' selected':'')+'>'+c+'</option>').join('');
+}
+
+window.toggleMarkup=function(){
+  const tog=document.getElementById('markup-tog');
+  const on=tog.classList.toggle('on');
+  document.getElementById('f-markup').style.display=on?'':'none';
+  if(!on){document.getElementById('markup-prev').textContent='';document.getElementById('f-retail').value='';}
+};
+
+window.previewMarkup=function(){
+  const cost=parseFloat(document.getElementById('f-cost').value)||0;
+  const pct=parseFloat(document.getElementById('f-markup').value)||0;
+  if(!cost||!pct){document.getElementById('markup-prev').textContent='';return;}
+  const retail=roundTo10(cost*(1+pct/100));
+  document.getElementById('f-retail').value=retail;
+  document.getElementById('markup-prev').textContent='= ₦'+retail.toLocaleString();
+};
+
+window.saveProd=function(){
+  const id=document.getElementById('edit-id').value;
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){alert('Enter a product name.');return;}
+  const cat=document.getElementById('f-cat').value;
+  const price=parseFloat(document.getElementById('f-cost').value)||0;
+  const retailPrice=parseFloat(document.getElementById('f-retail').value)||0;
+  const reorder=parseInt(document.getElementById('f-reorder').value)||0;
+  const prod=document.getElementById('f-prod').value;
+  const exp=document.getElementById('f-exp').value;
+  const qty=parseInt(document.getElementById('f-qty').value)||0;
+  if(id){
+    const p=DB.products.find(x=>x.id===id);
+    Object.assign(p,{name,category:cat,price,retailPrice,reorder});
+    addLog('Product updated: '+name,'cyan');
+  } else {
+    if(!DB.products)DB.products=[];
+    DB.products.push({id:uid(),name,category:cat,price,retailPrice,reorder,prodDate:prod,expiry:exp,
+      batches:qty>0?[{id:uid(),name:fmtBatch(exp),qty,expiry:exp||''}]:[]});
+    addLog('Product created: '+name,'green');
+  }
+  saveDB(); closeOv('prod-ov'); renderCurrentPage();
+};
+
+// ── SELL ──────────────────────────────────────────────────────────
+function openSell(id){
+  const p=DB.products.find(x=>x.id===id);if(!p)return;
+  const batches=(p.batches||[]).filter(b=>b.qty>0);
+  const retail=p.retailPrice&&p.retailPrice>0?p.retailPrice:p.price;
+  const bOpts=batches.map(b=>'<option value="'+b.id+'">'+b.name+' ('+b.qty+' units)</option>').join('');
+  document.getElementById('sell-title').textContent='SELL — '+p.name;
+  document.getElementById('sell-body').innerHTML=
+    '<input type="hidden" id="sell-pid" value="'+id+'">'
+    +'<div class="fr"><label class="fl">Batch</label><select class="fi fi-sel" id="sell-batch">'+(bOpts||'<option>No stock</option>')+'</select></div>'
+    +'<div class="fr"><label class="fl">Quantity</label><input class="fi" type="number" id="sell-qty" placeholder="0" min="1"></div>'
+    +'<div class="fr"><label class="fl">Unit Price (₦)</label><input class="fi" type="number" id="sell-price" value="'+(retail||'')+'" placeholder="0"></div>'
+    +'<div class="fr"><label class="fl">Client Name</label><div class="ac-wrap"><input class="fi" type="text" id="sell-client" placeholder="client name..." oninput="clientAcFilter()" onkeydown="clientAcKey(event)" autocomplete="off"><div class="ac-drop" id="client-drop"></div></div></div>'
+    +'<div class="fr"><label class="fl">Phone</label><input class="fi" type="text" id="sell-phone" placeholder="optional"></div>'
+    +'<div class="fr"><label class="fl">Notes</label><input class="fi" type="text" id="sell-notes" placeholder="optional"></div>'
+    +'<div class="toggle-row"><div class="toggle" id="wb-tog" onclick="this.classList.toggle(\'on\');document.getElementById(\'wb-wrap\').style.display=this.classList.contains(\'on\')?\'block\':\'none\'"></div><span class="toggle-lbl">Add Waybill charge</span></div>'
+    +'<div id="wb-wrap" style="display:none" class="fr"><label class="fl">Waybill Amount (₦)</label><input class="fi" type="number" id="wb-amt" placeholder="0"></div>'
+    +'<button class="btn btn-solid" style="width:100%;margin-top:4px" onclick="doSell()">Confirm Sale</button>';
+  closeOv('detail-ov');
+  openOv('sell-ov');
+}
+window.openSell=openSell;
+
+window.doSell=function(){
+  const id=document.getElementById('sell-pid').value;
+  const p=DB.products.find(x=>x.id===id);if(!p)return;
+  const bid=document.getElementById('sell-batch').value;
+  const qty=parseInt(document.getElementById('sell-qty').value)||0;
+  const price=parseFloat(document.getElementById('sell-price').value)||0;
+  const client=document.getElementById('sell-client').value.trim();
+  const phone=document.getElementById('sell-phone').value.trim();
+  const notes=document.getElementById('sell-notes').value.trim();
+  const wb=document.getElementById('wb-tog').classList.contains('on')?parseFloat(document.getElementById('wb-amt').value)||0:0;
+  if(!bid){alert('No batch available.');return;}
+  if(!qty||qty<1){alert('Enter a valid quantity.');return;}
+  if(!client){alert('Enter client name.');return;}
+  const b=(p.batches||[]).find(x=>x.id===bid);
+  if(!b||b.qty<qty){alert('Insufficient stock in batch.');return;}
+  b.qty-=qty;
+  if(!DB.sales)DB.sales=[];
+  const sale={id:uid(),product:p.name,batch:b.name,qty,unitPrice:price,subtotal:qty*price,waybill:wb,client,phone,notes,time:new Date().toISOString()};
+  DB.sales.unshift(sale);
+  if(!DB.clients)DB.clients=[];
+  const allC=DB.clients.map(c=>typeof c==='string'?{name:c,phone:''}:c);
+  const ex=allC.find(c=>c.name===client);
+  if(ex){if(phone)ex.phone=phone;}else allC.push({name:client,phone:phone||''});
+  DB.clients=allC;
+  addLog('Sale: '+qty+'x '+p.name+' to '+client,'green');
+  saveDB(); closeOv('sell-ov'); renderCurrentPage();
+};
+
+// client autocomplete
+window.clientAcFilter=function(){
+  const q=(document.getElementById('sell-client')?.value||'').toLowerCase();
+  const drop=document.getElementById('client-drop'); if(!drop)return;
+  if(!q){drop.style.display='none';return;}
+  const all=(DB.clients||[]).map(c=>typeof c==='string'?{name:c,phone:''}:c);
+  clientAcItems=all.filter(c=>c.name.toLowerCase().includes(q));
+  clientAcHi=-1;
+  if(!clientAcItems.length){drop.style.display='none';return;}
+  drop.innerHTML=clientAcItems.map((c,i)=>'<div class="ac-item" onmousedown="selClient('+i+')"><div>'+c.name+'</div>'+(c.phone?'<div class="ac-sub">'+c.phone+'</div>':'')+'</div>').join('');
+  drop.style.display='block';
+};
+window.selClient=function(i){
+  const c=clientAcItems[i];if(!c)return;
+  document.getElementById('sell-client').value=c.name;
+  if(c.phone)document.getElementById('sell-phone').value=c.phone;
+  document.getElementById('client-drop').style.display='none';
+};
+window.clientAcKey=function(e){
+  const items=document.querySelectorAll('#client-drop .ac-item');
+  if(e.key==='ArrowDown'){clientAcHi=Math.min(clientAcHi+1,items.length-1);e.preventDefault();}
+  else if(e.key==='ArrowUp'){clientAcHi=Math.max(clientAcHi-1,0);e.preventDefault();}
+  else if(e.key==='Enter'&&clientAcHi>=0){window.selClient(clientAcHi);}
+  else if(e.key==='Escape'){document.getElementById('client-drop').style.display='none';}
+  items.forEach((el,i)=>el.classList.toggle('hi',i===clientAcHi));
+};
+document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap')){document.querySelectorAll('.ac-drop').forEach(d=>d.style.display='none');}});
+
+// ── ISSUE STOCK ───────────────────────────────────────────────────
+function renderIssuance(){
+  populateDeptSel();
+  renderIssLog();
+}
+function populateDeptSel(){
+  const sel=document.getElementById('iss-dept'); if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— select department —</option>';
+  (DB.departments||[]).forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+  const ot=document.createElement('option');ot.value='other';ot.textContent='Other (specify)';sel.appendChild(ot);
+  if(cur)sel.value=cur;
+}
+window.handleDeptChange=function(){
+  const v=document.getElementById('iss-dept').value;
+  const oth=document.getElementById('iss-other');
+  oth.style.display=v==='other'?'block':'none';
+  if(v!=='other')oth.value='';
+};
+
+// issue product autocomplete
+window.issAcFilter=function(){
+  const q=document.getElementById('iss-input').value.toLowerCase();
+  const drop=document.getElementById('iss-drop');
+  issAcItems=(DB.products||[]).filter(p=>!p.archived&&totalQty(p)>0&&(!q||p.name.toLowerCase().includes(q)));
+  issAcHi=-1;
+  if(!issAcItems.length){drop.style.display='none';return;}
+  drop.innerHTML=issAcItems.map((p,i)=>'<div class="ac-item" onmousedown="issSelProd('+i+')"><div>'+p.name+'</div><div class="ac-sub">'+p.category+' · '+totalQty(p)+' units</div></div>').join('');
+  drop.style.display='block';
+};
+window.issSelProd=function(i){
+  const p=issAcItems[i];if(!p)return;
+  document.getElementById('iss-input').value=p.name;
+  document.getElementById('iss-pid').value=p.id;
+  document.getElementById('iss-drop').style.display='none';
+  const sel=document.getElementById('iss-batch');
+  sel.innerHTML='<option value="">— select batch —</option>';
+  (p.batches||[]).filter(b=>b.qty>0).forEach(b=>{const o=document.createElement('option');o.value=b.id;o.textContent=b.name+' — '+b.qty+' units';sel.appendChild(o);});
+};
+window.issAcKey=function(e){
+  const items=document.querySelectorAll('#iss-drop .ac-item');
+  if(e.key==='ArrowDown'){issAcHi=Math.min(issAcHi+1,items.length-1);e.preventDefault();}
+  else if(e.key==='ArrowUp'){issAcHi=Math.max(issAcHi-1,0);e.preventDefault();}
+  else if(e.key==='Enter'&&issAcHi>=0){window.issSelProd(issAcHi);}
+  else if(e.key==='Escape'){document.getElementById('iss-drop').style.display='none';}
+  items.forEach((el,i)=>el.classList.toggle('hi',i===issAcHi));
+};
+
+window.doIssue=function(){
+  const pid=document.getElementById('iss-pid').value;
+  const bid=document.getElementById('iss-batch').value;
+  const qty=parseInt(document.getElementById('iss-qty').value);
+  const dept=document.getElementById('iss-dept').value;
+  const other=document.getElementById('iss-other').value.trim();
+  const to=dept==='other'?other:dept;
+  if(!pid||!bid||!qty||qty<1){alert('Fill in all fields.');return;}
+  if(!to){alert('Select a department or specify recipient.');return;}
+  const p=DB.products.find(x=>x.id===pid);
+  const b=(p.batches||[]).find(x=>x.id===bid);
+  if(!b||b.qty<qty){alert('Insufficient batch quantity.');return;}
+  b.qty-=qty;
+  if(!DB.issuances)DB.issuances=[];
+  DB.issuances.unshift({id:uid(),product:p.name,batch:b.name,qty,to,time:new Date().toISOString()});
+  addLog('Issued '+qty+' units of '+p.name+' to '+to,'cyan');
+  saveDB();
+  document.getElementById('iss-input').value='';document.getElementById('iss-pid').value='';
+  document.getElementById('iss-batch').innerHTML='<option value="">— select batch —</option>';
+  document.getElementById('iss-qty').value='';
+  document.getElementById('iss-dept').value='';document.getElementById('iss-other').value='';document.getElementById('iss-other').style.display='none';
+  renderIssLog(); renderCurrentPage();
+};
+function renderIssLog(){
+  const el=document.getElementById('iss-log');if(!el)return;
+  const items=(DB.issuances||[]).slice(0,8);
+  if(!items.length){el.innerHTML='<div class="empty">no issuances yet</div>';return;}
+  el.innerHTML=items.map(i=>'<div class="log-item"><div class="log-dot" style="background:var(--cyan)"></div><div><div style="font-size:12px">'+i.qty+' × '+i.product+'</div><div style="font-size:10px;color:var(--text3)">'+i.to+' · '+fmtT(i.time)+'</div></div></div>').join('');
+}
+
+// ── SALES ─────────────────────────────────────────────────────────
+function renderSales(){
+  const q=(document.getElementById('sales-search').value||'').toLowerCase();
+  const el=document.getElementById('sales-body');
+  const sales=(DB.sales||[]).filter(s=>!q||s.client.toLowerCase().includes(q));
+  if(!sales.length){el.innerHTML='<div class="empty">no sales yet</div>';return;}
+  // group by client
+  const groups={};
+  sales.forEach(s=>{if(!groups[s.client])groups[s.client]=[];groups[s.client].push(s);});
+  el.innerHTML=Object.entries(groups).map(([client,items])=>{
+    const total=items.reduce((a,s)=>a+s.subtotal+(s.waybill||0),0);
+    const rows=items.map(s=>'<tr><td style="font-size:12px">'+s.product+'</td><td style="font-size:11px;color:var(--text2)">'+s.batch+'</td><td>'+s.qty+'</td><td>'+fmtP(s.unitPrice)+'</td><td style="font-weight:500">'+fmtP(s.subtotal)+'</td><td style="font-size:10px;color:var(--text3)">'+fmtT(s.time)+'</td><td><input type="checkbox" class="sale-chk" value="'+s.id+'"></td><td><button class="btn btn-sm btn-red" onclick="cancelSale(\''+s.id+'\')">✕</button></td></tr>').join('');
+    return '<div class="card"><div class="card-hdr"><div><div style="font-weight:500">'+client+'</div><div style="font-size:11px;color:var(--text2)">'+items.length+' item(s) · total: '+fmtP(total)+'</div></div><button class="btn btn-sm" onclick="printGroup(\''+client+'\')">Print Invoice</button></div>'
+      +'<table class="tbl"><thead><tr><th>Product</th><th>Batch</th><th>Qty</th><th>Unit</th><th>Subtotal</th><th>Date</th><th>✓</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>'
+      +'<div style="margin-top:10px;display:flex;gap:8px"><button class="btn btn-sm" onclick="printSelected(\''+client+'\')">Print Selected</button></div></div>';
+  }).join('');
+}
+
+window.cancelSale=function(id){
+  if(!confirm('Cancel this sale and restore stock?'))return;
+  const s=(DB.sales||[]).find(x=>x.id===id);
+  if(s){
+    const p=DB.products.find(x=>x.name===s.product);
+    if(p){const b=(p.batches||[]).find(x=>x.name===s.batch);if(b)b.qty+=s.qty;}
+  }
+  DB.sales=(DB.sales||[]).filter(x=>x.id!==id);
+  addLog('Sale cancelled — stock restored: '+(s?s.product:''),'amber');
+  saveDB(); renderSales(); renderCurrentPage();
+};
+
+window.printGroup=function(client){
+  const items=(DB.sales||[]).filter(s=>s.client===client);
+  if(!items.length)return;
+  showInvoice(items);
+};
+window.printSelected=function(client){
+  const checked=[...document.querySelectorAll('.sale-chk:checked')].map(c=>c.value);
+  if(!checked.length){alert('Check at least one sale.');return;}
+  const items=(DB.sales||[]).filter(s=>checked.includes(s.id));
+  showInvoice(items);
+};
+
+// ── INVOICE ───────────────────────────────────────────────────────
+function fmtInvNo(n){return'INV#'+String(n).padStart(3,'0');}
+function nextInvNo(){DB.invCounter=(DB.invCounter||0)+1;saveDB();return DB.invCounter;}
+
+function amountToWords(n){
+  const a=['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const b=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  if(n===0)return'zero naira only';
+  const w=x=>{if(x<20)return a[x];if(x<100)return b[Math.floor(x/10)]+(x%10?' '+a[x%10]:'');if(x<1000)return a[Math.floor(x/100)]+' hundred'+(x%100?' '+w(x%100):'');if(x<1000000)return w(Math.floor(x/1000))+' thousand'+(x%1000?' '+w(x%1000):'');return w(Math.floor(x/1000000))+' million'+(x%1000000?' '+w(x%1000000):'');};
+  return w(Math.floor(n))+' naira only';
+}
+
+function buildInvoiceHTML(sales,invNo){
+  if(!sales||!sales.length)return'';
+  if(!invNo)invNo='INV#---';
+  const client=sales[0].client;
+  const phone=sales[0].phone;
+  const logo=DB.orgLogo?'<img src="'+DB.orgLogo+'" style="height:60px;object-fit:contain;margin-bottom:6px"><br>':'';
+  const motto=DB.orgMotto&&DB.orgMotto!=='your motto here'?'<div style="font-size:9px;color:#888;font-style:italic;margin-top:2px">'+DB.orgMotto+'</div>':'';
+  let rows='';let grandTotal=0;let wb=0;
+  sales.forEach(s=>{
+    rows+='<tr><td style="padding:6px 8px;border:1px solid #ccc">'+s.product+'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #ccc;font-size:10px">'+s.batch+'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #ccc;text-align:center">'+s.qty+'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #ccc;text-align:right">₦'+Number(s.unitPrice).toLocaleString()+'</td>'
+      +'<td style="padding:6px 8px;border:1px solid #ccc;text-align:right"><b>₦'+Number(s.subtotal).toLocaleString()+'</b></td></tr>';
+    grandTotal+=s.subtotal;
+    if(s.waybill&&s.waybill>0)wb+=s.waybill;
+  });
+  if(wb>0){
+    rows+='<tr><td colspan="4" style="padding:6px 8px;border:1px solid #ccc;color:#555;font-style:italic">Waybill</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">₦'+wb.toLocaleString()+'</td></tr>';
+    grandTotal+=wb;
+  }
+  const hashBase=invNo+'|'+grandTotal+'|'+client+'|'+(DB.orgName||'');
+  let hash=0;for(let i=0;i<hashBase.length;i++){hash=((hash<<5)-hash)+hashBase.charCodeAt(i);hash|=0;}
+  const secCode=invNo.replace('#','')+'-'+Math.abs(hash).toString(36).toUpperCase().padStart(8,'0');
+  const micro=((DB.orgName||'NEOOPS').toUpperCase()+' · '+secCode+' · ').repeat(28);
+  const microBar='<div style="font-size:5px;color:rgba(0,0,0,0.15);letter-spacing:0.5px;word-break:break-all;line-height:1.3;padding:4px 8px;background:#f5f5f5">'+micro+'</div>';
+  const secBar='<div style="border:1px solid #ddd;border-radius:3px;padding:8px 12px;margin-bottom:12px;background:#f9f9f9;display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:8px;color:#aaa;letter-spacing:1px">VERIFICATION</div>'
+    +'<div style="font-family:monospace;font-size:10px;font-weight:700;color:#333;letter-spacing:2px">'+secCode+'</div>'
+    +'<div style="font-size:8px;color:#aaa">'+new Date().toLocaleDateString()+'</div></div>';
+  const notes=sales.filter(s=>s.notes).map(s=>s.notes).join('; ');
+  return'<div style="font-family:Arial,sans-serif;font-size:12px;color:#111;max-width:560px;margin:0 auto;border:1px solid #ccc">'
+    +microBar
+    +'<div style="padding:20px 24px">'
+    +'<div style="text-align:center;border-bottom:2px solid #000;padding-bottom:12px;margin-bottom:16px">'
+    +logo+'<div style="font-size:18px;font-weight:700;letter-spacing:2px">'+(DB.orgName||'Organisation')+'</div>'+motto
+    +'<div style="font-size:10px;letter-spacing:3px;color:#555;margin-top:4px">INVOICE</div></div>'
+    +'<div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><b>Invoice No:</b> '+invNo+'</div><div><b>Date:</b> '+new Date().toLocaleDateString()+'</div></div>'
+    +'<div style="margin-bottom:12px"><div><b>Bill To:</b> '+client+'</div>'+(phone?'<div><b>Phone:</b> '+phone+'</div>':'')+'</div>'
+    +'<table style="width:100%;border-collapse:collapse;margin-bottom:12px"><thead><tr style="background:#f0f0f0">'
+    +'<th style="padding:6px 8px;text-align:left;border:1px solid #ccc;font-size:11px">Product</th>'
+    +'<th style="padding:6px 8px;text-align:left;border:1px solid #ccc;font-size:11px">Batch</th>'
+    +'<th style="padding:6px 8px;text-align:center;border:1px solid #ccc;font-size:11px">Qty</th>'
+    +'<th style="padding:6px 8px;text-align:right;border:1px solid #ccc;font-size:11px">Unit</th>'
+    +'<th style="padding:6px 8px;text-align:right;border:1px solid #ccc;font-size:11px">Amount</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div style="text-align:right;margin-bottom:8px;font-size:14px"><b>Grand Total: ₦'+grandTotal.toLocaleString()+'</b></div>'
+    +'<div style="background:#f9f9f9;border:1px solid #ddd;padding:8px 10px;margin-bottom:12px;font-size:11px;font-style:italic">'+amountToWords(grandTotal)+'</div>'
+    +(notes?'<div style="font-size:11px;color:#555;margin-bottom:12px"><b>Notes:</b> '+notes+'</div>':'')
+    +secBar
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;padding-top:14px;border-top:1px solid #ccc">'
+    +'<div style="text-align:center"><div style="border-top:1px solid #000;margin-top:28px;padding-top:4px;font-size:10px">Authorised Signature</div></div>'
+    +'<div style="text-align:center"><div style="border-top:1px solid #000;margin-top:28px;padding-top:4px;font-size:10px">Received By</div></div></div>'
+    +'<div style="margin-top:14px;font-size:10px;color:#888;text-align:center">Thank you for your business — '+(DB.orgName||'Organisation')+'</div>'
+    +'</div>'+microBar+'</div>';
+}
+
+function showInvoice(sales){
+  currentInvData=sales;
+  currentInvNo=fmtInvNo(nextInvNo());
+  document.getElementById('inv-box').innerHTML=buildInvoiceHTML(sales,currentInvNo);
+  document.getElementById('inv-overlay').classList.add('open');
+}
+
+window.closeInvoice=function(){
+  document.getElementById('inv-overlay').classList.remove('open');
+  currentInvData=null; currentInvNo=null;
+};
+
+window.doPrint=function(){
+  if(!currentInvData)return;
+  const html=buildInvoiceHTML(currentInvData,currentInvNo);
+  const w=window.open('','_blank','width=760,height=960');
+  if(!w){alert('Please allow popups to print.');return;}
+  w.document.write('<!DOCTYPE html><html><head><title>'+currentInvNo+'</title>'
+    +'<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;color:#000;font-family:Arial,sans-serif}table{border-collapse:collapse}@media print{@page{margin:0.8cm}}</style>'
+    +'</head><body>'+html+'</body></html>');
+  w.document.close();
+  setTimeout(()=>{w.focus();w.print();},400);
+  if(!DB.pastInvoices)DB.pastInvoices=[];
+  DB.pastInvoices.unshift({id:uid(),invNo:currentInvNo,date:new Date().toISOString(),client:currentInvData[0].client,items:currentInvData,printedAt:new Date().toISOString()});
+  const ids=currentInvData.map(s=>s.id);
+  DB.sales=(DB.sales||[]).filter(s=>!ids.includes(s.id));
+  addLog('Invoice '+currentInvNo+' printed for '+currentInvData[0].client,'green');
+  saveDB(); window.closeInvoice(); renderCurrentPage();
+};
+
+// ── PAST INVOICES ─────────────────────────────────────────────────
+function renderInvoices(){
+  const q=(document.getElementById('inv-search').value||'').toLowerCase();
+  let invs=(DB.pastInvoices||[]);
+  if(q)invs=invs.filter(i=>(i.client||'').toLowerCase().includes(q)||(i.invNo||'').toLowerCase().includes(q));
+  document.getElementById('inv-count').textContent=invs.length+' total';
+  const el=document.getElementById('inv-list');
+  if(!invs.length){el.innerHTML='<div class="empty">'+(q?'no match':'no past invoices')+'</div>';return;}
+  el.innerHTML=invs.map(inv=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;margin-bottom:8px">'
+    +'<div><div style="font-size:12px;font-weight:500">'+inv.invNo+'</div>'
+    +'<div style="font-size:11px;color:var(--text2);margin-top:2px">'+inv.client+' · '+((inv.items||[]).length)+' item(s)</div>'
+    +'<div style="font-size:10px;color:var(--text3)">'+fmtT(inv.printedAt)+'</div></div>'
+    +'<button class="btn btn-sm" onclick="reprintInv(\''+inv.id+'\')">Reprint</button></div>').join('');
+}
+
+window.reprintInv=function(id){
+  const inv=(DB.pastInvoices||[]).find(x=>x.id===id);if(!inv)return;
+  const html=buildInvoiceHTML(inv.items||[],inv.invNo);
+  const w=window.open('','_blank','width=760,height=960');
+  if(!w){alert('Please allow popups to print.');return;}
+  w.document.write('<!DOCTYPE html><html><head><title>'+inv.invNo+'</title>'
+    +'<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;font-family:Arial,sans-serif}table{border-collapse:collapse}@media print{@page{margin:0.8cm}}</style>'
+    +'</head><body>'+html+'</body></html>');
+  w.document.close();
+  setTimeout(()=>{w.focus();w.print();},400);
+  addLog('Reprinted: '+inv.invNo,'cyan');saveDB();
+};
+
+// ── LOGS ──────────────────────────────────────────────────────────
+window.setLogFilter=function(f,el){
+  logFilter=f;
+  document.querySelectorAll('#log-tabs .sort-btn').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderLogs();
+};
+function renderLogs(){
+  const kw={sale:'sale',issue:'issued',product:'product',invoice:'invoice'};
+  let logs=DB.logs||[];
+  if(logFilter!=='all'&&kw[logFilter])logs=logs.filter(l=>l.msg.toLowerCase().includes(kw[logFilter]));
+  document.getElementById('log-count').textContent=logs.length+' entries';
+  const el=document.getElementById('log-list');
+  if(!logs.length){el.innerHTML='<div class="empty">no entries</div>';return;}
+  const c={cyan:'var(--cyan)',green:'var(--green)',red:'var(--red)',amber:'var(--amber)',info:'var(--text2)'};
+  el.innerHTML=logs.map(l=>'<div class="log-item"><div class="log-dot" style="background:'+(c[l.type]||c.info)+'"></div><div><div style="font-size:12px">'+l.msg+'</div><div style="font-size:10px;color:var(--text3)">'+fmtT(l.time)+'</div></div></div>').join('');
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────
+function renderSettings(){
+  const cl=document.getElementById('cat-list');
+  cl.innerHTML=(DB.categories||[]).length?(DB.categories||[]).map(c=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:3px;margin-bottom:6px"><span>'+c+'</span><button class="btn btn-sm btn-red" onclick="removeCat(\''+c+'\')">Remove</button></div>').join(''):'<div class="empty">no categories</div>';
+  const dl=document.getElementById('dept-list');
+  dl.innerHTML=(DB.departments||[]).length?(DB.departments||[]).map(d=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:3px;margin-bottom:6px"><span>'+d+'</span><button class="btn btn-sm btn-red" onclick="removeDept(\''+d+'\')">Remove</button></div>').join(''):'<div class="empty">no departments</div>';
+}
+window.addCat=function(){
+  if(!DB.categories)DB.categories=[];
+  const v=document.getElementById('new-cat').value.trim();
+  if(!v||DB.categories.includes(v))return;
+  DB.categories.push(v);addLog('Category added: '+v,'cyan');saveDB();document.getElementById('new-cat').value='';renderSettings();
+};
+window.removeCat=function(c){
+  DB.categories=(DB.categories||[]).filter(x=>x!==c);
+  addLog('Category removed: '+c,'red');saveDB();renderSettings();
+};
+window.addDept=function(){
+  if(!DB.departments)DB.departments=[];
+  const v=document.getElementById('new-dept').value.trim();
+  if(!v||DB.departments.includes(v))return;
+  DB.departments.push(v);addLog('Department added: '+v,'cyan');saveDB();document.getElementById('new-dept').value='';renderSettings();populateDeptSel();
+};
+window.removeDept=function(d){
+  DB.departments=(DB.departments||[]).filter(x=>x!==d);
+  addLog('Department removed: '+d,'red');saveDB();renderSettings();populateDeptSel();
+};
+
+// ── ARCHIVES ──────────────────────────────────────────────────────
+function renderArchive(){
+  const arch=(DB.products||[]).filter(p=>p.archived);
+  const el=document.getElementById('archive-list');
+  if(!arch.length){el.innerHTML='<div class="empty">no archived products</div>';return;}
+  el.innerHTML=arch.map(p=>'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:12px;margin-bottom:8px">'
+    +'<div style="font-size:12px;font-weight:500;margin-bottom:2px">'+p.name+'</div>'
+    +'<div style="font-size:11px;color:var(--text2);margin-bottom:10px">'+p.category+' · archived '+fmtT(p.archivedAt)+'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button class="btn btn-sm btn-green" onclick="restoreProd(\''+p.id+'\')">Restore</button>'
+    +'<button class="btn btn-sm btn-red" onclick="deleteProd(\''+p.id+'\')">Delete Permanently</button>'
+    +'</div></div>').join('');
+}
+window.restoreProd=function(id){
+  const p=DB.products.find(x=>x.id===id);
+  delete p.archived; delete p.archivedAt;
+  addLog('Restored: '+p.name,'green');saveDB();renderArchive();renderCurrentPage();
+};
+window.deleteProd=function(id){
+  const p=DB.products.find(x=>x.id===id);
+  if(!confirm('Permanently delete "'+p.name+'"? Cannot be undone.'))return;
+  DB.products=DB.products.filter(x=>x.id!==id);
+  addLog('Deleted permanently: '+p.name,'red');saveDB();renderArchive();
+};
+
+// ── PASSWORDS ─────────────────────────────────────────────────────
+const PW_SECTIONS={dashboard:'Dashboard',products:'Inventory',issuance:'Issue Stock',admin:'Admin'};
+async function tryPasswords(){
+  if(DB.passwords&&DB.passwords['admin']&&!adminUnlocked){
+    const ok=await gateCheck('admin');if(!ok)return;adminUnlocked=true;
+  }
+  showPage('passwords',document.getElementById('sub-passwords'));
+}
+window.tryPasswords=tryPasswords;
+function renderPasswords(){
+  document.getElementById('pw-list').innerHTML=Object.entries(PW_SECTIONS).map(([s,lbl])=>'<div class="pw-row"><div><div style="font-size:12px">'+lbl+'</div><div style="font-size:10px;color:'+(DB.passwords&&DB.passwords[s]?'var(--amber)':'var(--text3)')+';margin-top:2px">'+(DB.passwords&&DB.passwords[s]?'🔒 protected':'unlocked')+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="openSetPw(\''+s+'\')">'+((DB.passwords&&DB.passwords[s])?'Change':'Set PW')+'</button>'+(DB.passwords&&DB.passwords[s]?'<button class="btn btn-sm btn-red" onclick="removePw(\''+s+'\')">Remove</button>':'')+'</div></div>').join('');
+}
+window.openSetPw=function(s){
+  document.getElementById('setpw-section').value=s;
+  document.getElementById('setpw-title').textContent=(DB.passwords&&DB.passwords[s]?'CHANGE':'SET')+' PASSWORD — '+PW_SECTIONS[s].toUpperCase();
+  document.getElementById('setpw-new').value='';document.getElementById('setpw-confirm').value='';
+  document.getElementById('setpw-err').textContent='';
+  openOv('setpw-ov');
+};
+window.doSetPw=function(){
+  const s=document.getElementById('setpw-section').value;
+  const np=document.getElementById('setpw-new').value;
+  const cp=document.getElementById('setpw-confirm').value;
+  if(!np){document.getElementById('setpw-err').textContent='Enter a password.';return;}
+  if(np!==cp){document.getElementById('setpw-err').textContent='Passwords do not match.';return;}
+  if(!DB.passwords)DB.passwords={};
+  DB.passwords[s]=np;addLog('Password set for: '+PW_SECTIONS[s],'amber');saveDB();closeOv('setpw-ov');renderPasswords();
+};
+window.removePw=function(s){
+  if(!DB.passwords)return;
+  delete DB.passwords[s];addLog('Password removed from: '+PW_SECTIONS[s],'amber');saveDB();renderPasswords();
+};
+
+// ── GATE ──────────────────────────────────────────────────────────
+function gateCheck(section){
+  return new Promise(resolve=>{
+    gateResolve=resolve;
+    document.getElementById('gate-title').textContent=PW_SECTIONS[section].toUpperCase()+' — LOCKED';
+    document.getElementById('gate-sub').textContent='Enter the password to continue.';
+    document.getElementById('gate-input').value='';
+    document.getElementById('gate-err').textContent='';
+    openOv('gate-ov');
+    setTimeout(()=>document.getElementById('gate-input').focus(),80);
+    window._gateSection=section;
+  });
+}
+window.submitGate=function(){
+  const v=document.getElementById('gate-input').value;
+  const s=window._gateSection;
+  if(v===(DB.passwords&&DB.passwords[s])){closeOv('gate-ov');if(gateResolve)gateResolve(true);}
+  else{document.getElementById('gate-err').textContent='Incorrect password.';}
+};
+window.cancelGate=function(){closeOv('gate-ov');if(gateResolve)gateResolve(false);};
+
+// ── SEED DATA ─────────────────────────────────────────────────────
+function seedData(){
+  if(DB.products&&DB.products.length)return;
+  const seed=[
+    {name:'Product Sample A',cat:'Electronics',cost:5000,retail:7000,reorder:10,batches:[{qty:50,exp:'2026-12-01'},{qty:30,exp:'2027-06-01'}]},
+    {name:'Product Sample B',cat:'Clothing',cost:2000,retail:2800,reorder:20,batches:[{qty:100,exp:''}]},
+    {name:'Product Sample C',cat:'Food',cost:800,retail:1200,reorder:50,batches:[{qty:15,exp:'2026-08-01'}]},
+  ];
+  if(!DB.products)DB.products=[];
+  seed.forEach(s=>{
+    DB.products.push({id:uid(),name:s.name,category:s.cat,price:s.cost,retailPrice:s.retail,reorder:s.reorder,
+      batches:s.batches.map(b=>({id:uid(),name:fmtBatch(b.exp||null),qty:b.qty,expiry:b.exp}))});
+  });
+  if(!DB.categories||!DB.categories.length)DB.categories=['Electronics','Clothing','Food','Beverages','Stationery'];
+  addLog('System initialized with sample data','cyan');
+  saveDB();
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────
+initApp().then(()=>{ seedData(); });
+
+</script>
+</body>
+</html>
+
 
       <!-- INVOICES -->
       <div class="page" id="page-invoices">
