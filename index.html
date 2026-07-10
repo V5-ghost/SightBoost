@@ -54,23 +54,24 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 .app.gone{display:none}
 
 /* ── SIDEBAR ── */
-.sidebar{width:210px;min-width:210px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-.s-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sidebar{width:210px;min-width:210px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width 0.25s,min-width 0.25s}
+.sidebar.collapsed{width:0;min-width:0;border-right:none}
+.s-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
 .s-logo-name{font-family:'Orbitron',monospace;font-size:15px;font-weight:700;color:var(--accent);letter-spacing:2px}
 .s-logo-sub{font-size:9px;color:var(--text3);letter-spacing:3px;margin-top:2px;text-transform:uppercase}
 .nav-root{flex:1;padding:12px 0;display:flex;flex-direction:column;overflow-y:auto}
 .nav-root.gone{display:none}
-.nav-item{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;color:var(--text2);font-size:12px;letter-spacing:0.5px;border-left:2px solid transparent}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;color:var(--text2);font-size:12px;letter-spacing:0.5px;border-left:2px solid transparent;white-space:nowrap}
 .nav-item:hover{color:var(--text);background:var(--bg3)}
 .nav-item svg{width:16px;height:16px;flex-shrink:0}
 .arr{margin-left:auto;opacity:0.3}
 .nav-drilled{flex:1;display:none;flex-direction:column;overflow-y:auto}
 .nav-drilled.show{display:flex}
-.nav-back{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;color:var(--text3);font-size:11px;border-bottom:1px solid var(--border);flex-shrink:0}
+.nav-back{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;color:var(--text3);font-size:11px;border-bottom:1px solid var(--border);flex-shrink:0;white-space:nowrap}
 .nav-back:hover{color:var(--accent)}
 .nav-back svg{width:14px;height:14px}
-.nav-section-title{padding:14px 16px 8px;font-size:9px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;font-family:'Orbitron',monospace;flex-shrink:0}
-.nav-sub{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--text2);font-size:12px;border-left:2px solid transparent}
+.nav-section-title{padding:14px 16px 8px;font-size:9px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;font-family:'Orbitron',monospace;flex-shrink:0;white-space:nowrap}
+.nav-sub{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--text2);font-size:12px;border-left:2px solid transparent;white-space:nowrap}
 .nav-sub:hover{color:var(--text);background:var(--bg3)}
 .nav-sub.active{color:var(--accent);background:var(--accent3);border-left-color:var(--accent)}
 .nav-sub svg{width:14px;height:14px;flex-shrink:0}
@@ -80,6 +81,9 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 .sync-dot.err{background:var(--red)}
 .theme-toggle{margin-left:auto;cursor:pointer;font-size:14px;opacity:0.7;background:none;border:none;color:var(--text2);padding:2px}
 .theme-toggle:hover{opacity:1}
+/* hamburger */
+.hamburger{display:flex;flex-direction:column;gap:4px;cursor:pointer;padding:4px;background:none;border:none;flex-shrink:0}
+.hamburger span{display:block;width:18px;height:2px;background:var(--accent);border-radius:2px;transition:all 0.2s}
 
 /* ── SAVE INDICATOR ── */
 #save-ind{position:absolute;top:12px;right:16px;font-size:10px;letter-spacing:1px;color:var(--text3);display:flex;align-items:center;gap:5px;z-index:10;transition:opacity 0.4s}
@@ -299,6 +303,9 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
   <!-- MAIN -->
   <div class="main">
     <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()" title="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
       <div class="topbar-title" id="page-title">OVERVIEW</div>
       <div class="sw" style="width:220px">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -557,6 +564,19 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
         </select>
       </div>
       <div class="fr"><label class="fl">PIN / Password</label><input class="fi" type="password" id="u-pin" placeholder="set a pin or password"></div>
+      <div class="fr">
+        <label class="fl">Signature (optional)</label>
+        <div id="sig-preview-wrap" style="display:none;margin-bottom:8px">
+          <img id="sig-preview" style="max-height:60px;max-width:200px;object-fit:contain;background:#fff;padding:4px;border-radius:3px;border:1px solid var(--border)">
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" onclick="document.getElementById('sig-input').click()">Upload Signature</button>
+          <button class="btn btn-sm btn-red" id="sig-clear-btn" style="display:none" onclick="clearSig()">Remove</button>
+        </div>
+        <input type="file" id="sig-input" accept="image/*" style="display:none">
+        <input type="hidden" id="u-sig">
+        <div style="font-size:10px;color:var(--text3);margin-top:6px">PNG with transparent background works best</div>
+      </div>
       <div id="user-err" style="color:var(--red);font-size:11px;min-height:14px"></div>
       <div class="f-actions">
         <button class="btn" onclick="closeOv('user-ov')">Cancel</button>
@@ -730,6 +750,11 @@ function addLog(msg,type='info'){
 
 // ─── NAVIGATION ──────────────────────────────────────────────────
 async function drillTo(section){
+  // block dashboard users from admin
+  if(section==='admin'&&currentUser&&currentUser.role==='dashboard'){
+    alert('Access denied.\n\n"'+currentUser.name+'" is a Dashboard user and is not allowed to access Admin.');
+    return;
+  }
   if(section==='dashboard'&&DB.passwords&&DB.passwords.dashboard&&!dashUnlocked){
     const ok=await gateCheck('dashboard');if(!ok)return;dashUnlocked=true;
   }
@@ -739,7 +764,6 @@ async function drillTo(section){
   document.getElementById('nav-root').classList.add('gone');
   document.querySelectorAll('.nav-drilled').forEach(d=>d.classList.remove('show'));
   document.getElementById('drill-'+section).classList.add('show');
-  // reset active nav-sub
   document.querySelectorAll('.nav-sub').forEach(n=>n.classList.remove('active'));
   if(section==='dashboard'){document.getElementById('sub-overview').classList.add('active');showPageOnly('overview');}
   if(section==='admin'){document.getElementById('sub-settings').classList.add('active');showPageOnly('settings');}
@@ -779,7 +803,30 @@ function renderPage(p){
   else if(p==='users')renderUsers();
 }
 
-// ─── USER LOGIN ──────────────────────────────────────────────────
+// ─── SIDEBAR TOGGLE ──────────────────────────────────────────────
+window.toggleSidebar=function(){
+  document.querySelector('.sidebar').classList.toggle('collapsed');
+};
+
+// ─── SIGNATURE UPLOAD ────────────────────────────────────────────
+document.getElementById('sig-input').addEventListener('change',function(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    document.getElementById('u-sig').value=ev.target.result;
+    const prev=document.getElementById('sig-preview');
+    prev.src=ev.target.result;
+    document.getElementById('sig-preview-wrap').style.display='block';
+    document.getElementById('sig-clear-btn').style.display='';
+  };r.readAsDataURL(f);
+});
+window.clearSig=function(){
+  document.getElementById('u-sig').value='';
+  document.getElementById('sig-preview').src='';
+  document.getElementById('sig-preview-wrap').style.display='none';
+  document.getElementById('sig-clear-btn').style.display='none';
+  document.getElementById('sig-input').value='';
+};
 let selectedLoginUser=null;
 function showUserLogin(){
   const screen=document.getElementById('user-login');
@@ -1066,7 +1113,10 @@ function renderIssReceipts(){
 }
 window.printIssReceipt=function(id){
   const r=(DB.issuances||[]).find(x=>x.id===id);if(!r)return;
-  const secCode='ISS-'+id.toUpperCase().slice(0,8);
+  // get issuing user's signature
+  const issUser=(DB.users||[]).find(u=>u.username===r.issuedBy)||null;
+  const issSigImg=issUser&&issUser.sig?'<img src="'+issUser.sig+'" style="height:40px;object-fit:contain;display:block;margin-bottom:4px">':'';
+  const issSigName=r.issuedBy||'';
   const micro=((r.orgName||DB.orgName||'NEOOPS').toUpperCase()+' · '+secCode+' · ').repeat(25);
   const microBar='<div style="font-size:5px;color:rgba(0,0,0,0.15);letter-spacing:0.5px;word-break:break-all;line-height:1.3;padding:4px 8px;background:#f5f5f5">'+micro+'</div>';
   const rows=(r.items||[]).map(i=>'<tr><td style="padding:6px 8px;border:1px solid #ccc">'+i.prodName+'</td><td style="padding:6px 8px;border:1px solid #ccc;font-size:10px">'+i.batchName+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:center;font-weight:700">'+i.qty+'</td></tr>').join('');
@@ -1076,7 +1126,7 @@ window.printIssReceipt=function(id){
     +'<div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><b>Receipt No:</b> '+secCode+'</div><div><b>Date:</b> '+new Date(r.time).toLocaleDateString()+'</div></div>'
     +'<div style="margin-bottom:12px"><div><b>Issued To:</b> '+r.to+'</div>'+(r.issuedBy?'<div><b>Issued By:</b> '+r.issuedBy+'</div>':'')+'</div>'
     +'<table style="width:100%;border-collapse:collapse;margin-bottom:12px"><thead><tr style="background:#f0f0f0"><th style="padding:6px 8px;text-align:left;border:1px solid #ccc">Product</th><th style="padding:6px 8px;text-align:left;border:1px solid #ccc">Batch</th><th style="padding:6px 8px;text-align:center;border:1px solid #ccc">Qty</th></tr></thead><tbody>'+rows+'</tbody></table>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;padding-top:14px;border-top:1px solid #ccc"><div style="text-align:center"><div style="border-top:1px solid #000;margin-top:28px;padding-top:4px;font-size:10px">Authorised Signature</div></div><div style="text-align:center"><div style="border-top:1px solid #000;margin-top:28px;padding-top:4px;font-size:10px">Received By</div></div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;padding-top:14px;border-top:1px solid #ccc"><div style="text-align:center">'+issSigImg+'<div style="border-top:1px solid #000;margin-top:'+(issSigImg?'4':'28')+'px;padding-top:4px;font-size:10px">Authorised By'+(issSigName?' — '+issSigName:'')+'</div></div><div style="text-align:center"><div style="border-top:1px solid #000;margin-top:28px;padding-top:4px;font-size:10px">Received By</div></div></div>'
     +'<div style="font-size:9px;color:#aaa;text-align:center;margin-top:10px">Verification: '+secCode+' — '+(r.orgName||DB.orgName||'Organisation')+'</div>'
     +'</div>'+microBar+'</div>';
   const w=window.open('','_blank','width=700,height=900');
@@ -1121,7 +1171,10 @@ function buildInvoiceHTML(sales,invNo){
   const microBar='<div style="font-size:5px;color:rgba(0,0,0,0.15);letter-spacing:0.5px;word-break:break-all;line-height:1.3;padding:4px 8px;background:#f5f5f5">'+micro+'</div>';
   const secBar='<div style="border:1px solid #ddd;border-radius:3px;padding:8px 12px;margin-bottom:12px;background:#f9f9f9;display:flex;justify-content:space-between;align-items:center"><div style="font-size:8px;color:#aaa;letter-spacing:1px">VERIFICATION</div><div style="font-family:monospace;font-size:10px;font-weight:700;color:#333;letter-spacing:2px">'+secCode+'</div><div style="font-size:8px;color:#aaa">'+new Date().toLocaleDateString()+'</div></div>';
   const notes=sales.filter(s=>s.notes).map(s=>s.notes).join('; ');
-  return'<div style="font-family:Arial,sans-serif;font-size:12px;color:#111;width:210mm;max-width:210mm;margin:0 auto;border:1px solid #ccc;box-sizing:border-box">'+microBar+'<div style="padding:20px 24px"><div style="text-align:center;border-bottom:2px solid #000;padding-bottom:12px;margin-bottom:16px">'+logo+'<div style="font-size:18px;font-weight:700;letter-spacing:2px">'+(DB.orgName||'Organisation')+'</div>'+motto+addr+'<div style="font-size:10px;letter-spacing:3px;color:#555;margin-top:6px">INVOICE</div></div><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><b>Invoice No:</b> '+invNo+'</div><div><b>Date:</b> '+new Date().toLocaleDateString()+'</div></div><div style="margin-bottom:12px"><div><b>Bill To:</b> '+client+'</div>'+(phone?'<div><b>Phone:</b> '+phone+'</div>':'')+'</div><table style="width:100%;border-collapse:collapse;margin-bottom:12px"><thead><tr style="background:#f0f0f0"><th style="padding:6px 8px;text-align:left;border:1px solid #ccc;font-size:11px">Product</th><th style="padding:6px 8px;text-align:left;border:1px solid #ccc;font-size:11px">Batch</th><th style="padding:6px 8px;text-align:center;border:1px solid #ccc;font-size:11px">Qty</th><th style="padding:6px 8px;text-align:right;border:1px solid #ccc;font-size:11px">Unit</th><th style="padding:6px 8px;text-align:right;border:1px solid #ccc;font-size:11px">Amount</th></tr></thead><tbody>'+rows+'</tbody></table><div style="text-align:right;margin-bottom:8px;font-size:14px"><b>Grand Total: ₦'+grand.toLocaleString()+'</b></div><div style="background:#f9f9f9;border:1px solid #ddd;padding:8px 10px;margin-bottom:12px;font-size:11px;font-style:italic">'+amountToWords(grand)+'</div>'+(notes?'<div style="font-size:11px;color:#555;margin-bottom:12px"><b>Notes:</b> '+notes+'</div>':'')+secBar+'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;padding-top:14px;border-top:1px solid #ccc"><div style="text-align:center"><div style="border-top:1px solid #000;margin-top:28px;padding-top:4px;font-size:10px">Authorised Signature</div></div><div style="text-align:center"><div style="border-top:1px solid #000;margin-top:28px;padding-top:4px;font-size:10px">Received By</div></div></div><div style="margin-top:14px;font-size:10px;color:#888;text-align:center">Thank you for your business — '+(DB.orgName||'Organisation')+'</div></div>'+microBar+'</div>';
+  // get current user signature if available
+  const sigImg=currentUser&&currentUser.sig?'<img src="'+currentUser.sig+'" style="height:40px;object-fit:contain;display:block;margin-bottom:4px">':'';
+  const sigName=currentUser?currentUser.name:'';
+  return'<div style="font-family:Arial,sans-serif;font-size:12px;color:#111;width:210mm;max-width:210mm;margin:0 auto;border:1px solid #ccc;box-sizing:border-box">'+microBar+'<div style="padding:20px 24px"><div style="text-align:center;border-bottom:2px solid #000;padding-bottom:12px;margin-bottom:16px">'+logo+'<div style="font-size:18px;font-weight:700;letter-spacing:2px">'+(DB.orgName||'Organisation')+'</div>'+motto+addr+'<div style="font-size:10px;letter-spacing:3px;color:#555;margin-top:6px">INVOICE</div></div><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><b>Invoice No:</b> '+invNo+'</div><div><b>Date:</b> '+new Date().toLocaleDateString()+'</div></div><div style="margin-bottom:12px"><div><b>Bill To:</b> '+client+'</div>'+(phone?'<div><b>Phone:</b> '+phone+'</div>':'')+'</div><table style="width:100%;border-collapse:collapse;margin-bottom:12px"><thead><tr style="background:#f0f0f0"><th style="padding:6px 8px;text-align:left;border:1px solid #ccc;font-size:11px">Product</th><th style="padding:6px 8px;text-align:left;border:1px solid #ccc;font-size:11px">Batch</th><th style="padding:6px 8px;text-align:center;border:1px solid #ccc;font-size:11px">Qty</th><th style="padding:6px 8px;text-align:right;border:1px solid #ccc;font-size:11px">Unit</th><th style="padding:6px 8px;text-align:right;border:1px solid #ccc;font-size:11px">Amount</th></tr></thead><tbody>'+rows+'</tbody></table><div style="text-align:right;margin-bottom:8px;font-size:14px"><b>Grand Total: ₦'+grand.toLocaleString()+'</b></div><div style="background:#f9f9f9;border:1px solid #ddd;padding:8px 10px;margin-bottom:12px;font-size:11px;font-style:italic">'+amountToWords(grand)+'</div>'+(notes?'<div style="font-size:11px;color:#555;margin-bottom:12px"><b>Notes:</b> '+notes+'</div>':'')+secBar+'<div style="margin-top:20px;padding-top:14px;border-top:1px solid #ccc;max-width:200px">'+sigImg+'<div style="border-top:1px solid #000;padding-top:4px;font-size:10px">Authorised By'+(sigName?' — '+sigName:'')+'</div></div><div style="margin-top:14px;font-size:10px;color:#888;text-align:center">Thank you for your business — '+(DB.orgName||'Organisation')+'</div></div>'+microBar+'</div>';
 }
 function showInvoice(sales){currentInvData=sales;currentInvNo=fmtInvNo(nextInvNo());document.getElementById('inv-box').innerHTML=buildInvoiceHTML(sales,currentInvNo);document.getElementById('inv-overlay').classList.add('open');}
 window.closeInvoice=function(){document.getElementById('inv-overlay').classList.remove('open');currentInvData=null;currentInvNo=null;};
@@ -1192,13 +1245,28 @@ function renderUsers(){
   const PW={dashboard:'Dashboard',admin:'Admin'};
   document.getElementById('pw-list').innerHTML=Object.entries(PW).map(([s,lbl])=>'<div class="pw-row"><div><div style="font-size:12px">'+lbl+'</div><div style="font-size:10px;color:'+(DB.passwords&&DB.passwords[s]?'var(--amber)':'var(--text3)')+';margin-top:2px">'+(DB.passwords&&DB.passwords[s]?'🔒 protected':'unlocked')+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="openSetPw(\''+s+'\')">'+((DB.passwords&&DB.passwords[s])?'Change':'Set PW')+'</button>'+(DB.passwords&&DB.passwords[s]?'<button class="btn btn-sm btn-red" onclick="removePw(\''+s+'\')">Remove</button>':'')+'</div></div>').join('');
 }
-window.openAddUser=function(){document.getElementById('user-edit-id').value='';document.getElementById('user-ov-title').textContent='ADD USER';['u-name','u-username','u-pin'].forEach(i=>document.getElementById(i).value='');document.getElementById('u-role').value='dashboard';document.getElementById('user-err').textContent='';openOv('user-ov');};
+window.openAddUser=function(){
+  document.getElementById('user-edit-id').value='';
+  document.getElementById('user-ov-title').textContent='ADD USER';
+  ['u-name','u-username','u-pin'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('u-role').value='dashboard';
+  document.getElementById('u-sig').value='';
+  document.getElementById('sig-preview-wrap').style.display='none';
+  document.getElementById('sig-clear-btn').style.display='none';
+  document.getElementById('sig-input').value='';
+  document.getElementById('user-err').textContent='';
+  openOv('user-ov');
+};
 window.saveUser=function(){
-  const name=document.getElementById('u-name').value.trim();const username=document.getElementById('u-username').value.trim().toLowerCase();const role=document.getElementById('u-role').value;const pin=document.getElementById('u-pin').value;
+  const name=document.getElementById('u-name').value.trim();
+  const username=document.getElementById('u-username').value.trim().toLowerCase();
+  const role=document.getElementById('u-role').value;
+  const pin=document.getElementById('u-pin').value;
+  const sig=document.getElementById('u-sig').value;
   if(!name||!username){document.getElementById('user-err').textContent='Name and username required.';return;}
-  if((DB.users||[]).find(u=>u.username===username&&u.id!==document.getElementById('user-edit-id').value)){document.getElementById('user-err').textContent='Username already taken.';return;}
+  if((DB.users||[]).find(u=>u.username===username)){document.getElementById('user-err').textContent='Username already taken.';return;}
   if(!DB.users)DB.users=[];
-  DB.users.push({id:uid(),name,username,role,pin:pin||'',createdAt:new Date().toISOString()});
+  DB.users.push({id:uid(),name,username,role,pin:pin||'',sig:sig||'',createdAt:new Date().toISOString()});
   addLog('User added: '+username+' ('+role+')','cyan');saveDB();closeOv('user-ov');renderUsers();
 };
 window.deleteUser=function(id){if(!confirm('Remove this user?'))return;DB.users=(DB.users||[]).filter(x=>x.id!==id);addLog('User removed','red');saveDB();renderUsers();};
