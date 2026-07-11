@@ -692,50 +692,53 @@ function saveDB(){
 
 async function initApp(){
   setSyncUI('connecting');
-  // 1. Load from localStorage FIRST — instant, no flicker on refresh
+  // 1. Load from localStorage FIRST — instant, works offline
   try{
     const local=localStorage.getItem('neoops_data');
     if(local){
-      const parsed=JSON.parse(local);
-      DB=Object.assign(DB,parsed);
-      // populate welcome immediately from local data
+      DB=Object.assign(DB,JSON.parse(local));
       document.getElementById('w-org').textContent=DB.orgName||'Organisation';
       document.getElementById('w-motto').textContent=DB.orgMotto||'your motto here';
       if(DB.orgLogo){const img=document.getElementById('logo-preview');img.src=DB.orgLogo;img.style.display='block';document.getElementById('logo-hint').style.display='none';}
     }
   }catch(e){}
-  // 2. Then fetch from Firebase to get latest from other devices
+
+  // clear status immediately — don't make user wait
+  document.getElementById('w-status').textContent='';
+  document.getElementById('w-org').textContent=DB.orgName||'Organisation';
+  document.getElementById('w-motto').textContent=DB.orgMotto||'your motto here';
+
+  // 2. Try Firebase with 3s timeout — fail gracefully if Firestore not set up
   try{
-    const snap=await getDoc(DOC);
+    const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),3000));
+    const snap=await Promise.race([getDoc(DOC),timeout]);
     if(snap.exists()){
       const remote=snap.data();
-      // use whichever has more logs (more recent activity)
       if(!DB.logs||!DB.logs.length||(remote.logs&&remote.logs.length>=DB.logs.length)){
         DB=Object.assign(DB,remote);
         try{localStorage.setItem('neoops_data',JSON.stringify(DB));}catch(_){}
+        document.getElementById('w-org').textContent=DB.orgName||'Organisation';
+        document.getElementById('w-motto').textContent=DB.orgMotto||'your motto here';
+        if(DB.orgLogo){const img=document.getElementById('logo-preview');img.src=DB.orgLogo;img.style.display='block';document.getElementById('logo-hint').style.display='none';}
       }
     }
     setSyncUI('ok');setSaveUI('saved');
   }catch(e){
-    console.warn('Firebase load error:',e);
+    console.warn('Firebase:',e.message);
     setSyncUI('err');
-    // still usable from localStorage
   }
-  // update welcome screen with final data
-  document.getElementById('w-org').textContent=DB.orgName||'Organisation';
-  document.getElementById('w-motto').textContent=DB.orgMotto||'your motto here';
-  if(DB.orgLogo){const img=document.getElementById('logo-preview');img.src=DB.orgLogo;img.style.display='block';document.getElementById('logo-hint').style.display='none';}
-  document.getElementById('w-status').textContent='';
+
   // 3. Realtime listener — push changes from other devices
-  onSnapshot(DOC,(snap)=>{
-    if(!snap.exists())return;
-    if(saveTimer)return; // don't overwrite mid-save
-    const remote=snap.data();
-    DB=Object.assign({products:[],categories:[],departments:[],passwords:{},users:[],logs:[],sales:[],pastInvoices:[],issuances:[],clients:[],orgName:'Organisation',orgMotto:'',orgAddress:'',orgLogo:null,invCounter:0},remote);
-    try{localStorage.setItem('neoops_data',JSON.stringify(DB));}catch(_){}
-    setSyncUI('ok');
-    if(!document.getElementById('app').classList.contains('gone'))renderCurrentPage();
-  },(err)=>{console.warn('Snapshot error:',err);setSyncUI('err');});
+  try{
+    onSnapshot(DOC,(snap)=>{
+      if(!snap.exists()||saveTimer)return;
+      const remote=snap.data();
+      DB=Object.assign({products:[],categories:[],departments:[],passwords:{},users:[],logs:[],sales:[],pastInvoices:[],issuances:[],clients:[],orgName:'Organisation',orgMotto:'',orgAddress:'',orgLogo:null,invCounter:0},remote);
+      try{localStorage.setItem('neoops_data',JSON.stringify(DB));}catch(_){}
+      setSyncUI('ok');
+      if(!document.getElementById('app').classList.contains('gone'))renderCurrentPage();
+    },(err)=>{console.warn('Snapshot:',err.message);setSyncUI('err');});
+  }catch(e){}
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────────
