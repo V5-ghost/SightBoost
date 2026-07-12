@@ -211,7 +211,7 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 
 <!-- WELCOME -->
 <div id="welcome">
-  <div class="w-logo">Sight<span>Boost</span></div>
+  <div class="w-logo">NEO<span>OPS</span></div>
   <div class="w-upload" id="logo-area">
     <img id="logo-preview" style="display:none" alt="logo">
     <div class="w-hint" id="logo-hint">⊕ upload logo</div>
@@ -241,7 +241,8 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 <div class="app gone" id="app">
   <div class="sidebar">
     <div class="s-logo">
-      <div class="s-logo-name">NEO<span style="color:var(--text3)">OPS</span></div>
+      <div id="sidebar-logo-img" style="display:none;margin-bottom:4px"><img id="sidebar-logo" style="height:32px;object-fit:contain;max-width:140px"></div>
+      <div class="s-logo-name" id="sidebar-logo-text">NEO<span style="color:var(--text3)">OPS</span></div>
       <div class="s-logo-sub">Inventory OS</div>
     </div>
     <!-- ROOT -->
@@ -277,23 +278,23 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Back
       </div>
       <div class="nav-section-title">Admin</div>
-      <div class="nav-sub active" id="sub-settings" onclick="showPage('settings',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Settings
-      </div>
-      <div class="nav-sub" id="sub-archive" onclick="showPage('archive',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>Archives
+      <div class="nav-sub active" id="sub-adminproducts" onclick="showPage('adminproducts',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8L6 7h12l-2-4z"/></svg>Products
       </div>
       <div class="nav-sub" id="sub-invoices" onclick="showPage('invoices',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Invoices
       </div>
-      <div class="nav-sub" id="sub-logs" onclick="showPage('logs',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Activity Log
+      <div class="nav-sub" id="sub-archive" onclick="showPage('archive',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>Archives
       </div>
       <div class="nav-sub" id="sub-users" onclick="showPage('users',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a7 7 0 0114 0v2"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/></svg>Users
       </div>
-      <div class="nav-sub" id="sub-organisation" onclick="showPage('organisation',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Organisation
+      <div class="nav-sub" id="sub-logs" onclick="showPage('logs',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Activity Log
+      </div>
+      <div class="nav-sub" id="sub-settings" onclick="showPage('settings',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Settings
       </div>
     </div>
     <div class="s-footer">
@@ -375,7 +376,47 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
         <div id="sales-body"></div>
       </div>
 
-      <!-- SETTINGS -->
+      <!-- ADMIN PRODUCTS -->
+      <div class="page" id="page-adminproducts">
+        <div class="sec-hdr"><div class="sec-title">Products</div></div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hdr"><div class="card-title">Add Product</div></div>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Create a new product in the inventory.</p>
+          <button class="btn btn-solid" onclick="openAddProd()">+ New Product</button>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="card-hdr"><div class="card-title">Product Query</div></div>
+          <div class="grid2" style="margin-bottom:14px;align-items:end">
+            <div>
+              <div class="fr"><label class="fl">Category</label>
+                <select class="fi fi-sel" id="q-cat"><option value="">All Categories</option></select>
+              </div>
+              <div class="fr"><label class="fl">Time Frame</label>
+                <select class="fi fi-sel" id="q-period" onchange="handleQPeriod()">
+                  <option value="7">Last 7 Days</option>
+                  <option value="30" selected>Last 30 Days</option>
+                  <option value="90">Last 3 Months</option>
+                  <option value="180">Last 6 Months</option>
+                  <option value="365">This Year</option>
+                  <option value="all">All Time</option>
+                  <option value="custom">Custom Range</option>
+                </select>
+              </div>
+              <div id="q-custom-wrap" style="display:none" class="fr2">
+                <div><label class="fl">From</label><input class="fi" type="date" id="q-from"></div>
+                <div><label class="fl">To</label><input class="fi" type="date" id="q-to"></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;padding-bottom:14px">
+              <button class="btn btn-solid" onclick="runQuery()">Run Query</button>
+              <button class="btn" onclick="printQuery()">🖨 Print</button>
+            </div>
+          </div>
+          <div id="query-results"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS (merged with Organisation) -->
       <div class="page" id="page-settings">
         <div class="sec-hdr"><div class="sec-title">Settings</div></div>
         <div class="grid2" style="align-items:start">
@@ -392,10 +433,22 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
             </div>
           </div>
           <div>
+            <div class="card" style="margin-bottom:12px">
+              <div class="card-hdr"><div class="card-title">Address & Contact</div></div>
+              <div class="fr"><label class="fl">Address / Contact Info</label>
+                <textarea class="fi" id="org-address" rows="4" placeholder="12 Main Street, Lagos&#10;Tel: 08012345678" style="resize:vertical"></textarea>
+              </div>
+              <button class="btn btn-solid" onclick="saveOrgAddress()">Save Address</button>
+            </div>
             <div class="card" style="margin:0">
-              <div class="card-hdr"><div class="card-title">Add Product</div></div>
-              <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Create a new product in the inventory.</p>
-              <button class="btn btn-solid" style="width:100%" onclick="openAddProd()">+ New Product</button>
+              <div class="card-hdr"><div class="card-title">Backup & Restore</div></div>
+              <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Auto-backup runs daily. Export a local JSON copy anytime.</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                <button class="btn" onclick="exportBackup()">⬇ Export JSON</button>
+                <button class="btn btn-amber" onclick="importBackup()">⬆ Restore</button>
+                <button class="btn btn-green" onclick="manualBackup()">☁ Backup Now</button>
+              </div>
+              <div style="font-size:10px;color:var(--text3)" id="backup-lbl">Last backup: checking...</div>
             </div>
           </div>
         </div>
@@ -449,29 +502,6 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
         </div>
       </div>
 
-      <!-- ORGANISATION -->
-      <div class="page" id="page-organisation">
-        <div class="sec-hdr"><div class="sec-title">Organisation</div></div>
-        <div class="grid2" style="align-items:start">
-          <div class="card" style="margin:0">
-            <div class="card-hdr"><div class="card-title">Address & Contact</div></div>
-            <div class="fr"><label class="fl">Address / Contact Info</label>
-              <textarea class="fi" id="org-address" rows="4" placeholder="12 Main Street, Lagos&#10;Tel: 08012345678" style="resize:vertical"></textarea>
-            </div>
-            <button class="btn btn-solid" onclick="saveOrgAddress()">Save Address</button>
-          </div>
-          <div class="card" style="margin:0">
-            <div class="card-hdr"><div class="card-title">Backup & Restore</div></div>
-            <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Auto-backup runs daily to cloud. Export a local copy anytime.</p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-              <button class="btn" onclick="exportBackup()">⬇ Export JSON</button>
-              <button class="btn btn-amber" onclick="importBackup()">⬆ Restore</button>
-              <button class="btn btn-green" onclick="manualBackup()">☁ Backup Now</button>
-            </div>
-            <div style="font-size:10px;color:var(--text3)" id="backup-lbl">Last backup: checking...</div>
-          </div>
-        </div>
-      </div>
 
     </div>
   </div>
@@ -778,7 +808,7 @@ async function drillTo(section){
   document.getElementById('drill-'+section).classList.add('show');
   document.querySelectorAll('.nav-sub').forEach(n=>n.classList.remove('active'));
   if(section==='dashboard'){document.getElementById('sub-overview').classList.add('active');showPageOnly('overview');}
-  if(section==='admin'){document.getElementById('sub-settings').classList.add('active');showPageOnly('settings');}
+  if(section==='admin'){document.getElementById('sub-adminproducts').classList.add('active');showPageOnly('adminproducts');}
 }
 window.drillTo=drillTo;
 
@@ -792,7 +822,7 @@ window.goRoot=goRoot;
 function showPageOnly(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  const titles={overview:'OVERVIEW',issuance:'ISSUE STOCK',sales:'SALES',settings:'SETTINGS',archive:'ARCHIVES',invoices:'INVOICES',logs:'ACTIVITY LOG',users:'USERS',organisation:'ORGANISATION'};
+  const titles={overview:'OVERVIEW',issuance:'ISSUE STOCK',sales:'SALES',adminproducts:'PRODUCTS',settings:'SETTINGS',archive:'ARCHIVES',invoices:'INVOICES',logs:'ACTIVITY LOG',users:'USERS'};
   document.getElementById('page-title').textContent=titles[page]||page.toUpperCase();
   renderPage(page);
 }
@@ -808,12 +838,13 @@ function renderPage(p){
   if(p==='overview')renderOverview();
   else if(p==='issuance')renderIssuance();
   else if(p==='sales')renderSales();
+  else if(p==='adminproducts')renderAdminProducts();
   else if(p==='settings')renderSettings();
   else if(p==='archive')renderArchive();
   else if(p==='invoices')renderInvoices();
   else if(p==='logs')renderLogs();
   else if(p==='users')renderUsers();
-  else if(p==='organisation')renderOrganisation();
+  else if(p==='organisation')renderSettings(); // fallback for old links
 }
 
 // ─── SIDEBAR TOGGLE ──────────────────────────────────────────────
@@ -1168,11 +1199,11 @@ window.printSelected=function(client){const checked=[...document.querySelectorAl
 // ─── INVOICE ────────────────────────────────────────────────────
 function fmtInvNo(n){return'INV#'+String(n).padStart(3,'0');}
 function nextInvNo(){DB.invCounter=(DB.invCounter||0)+1;return DB.invCounter;}
-function amountToWords(n){const a=['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];const b=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];if(n===0)return'zero naira only';const w=x=>{if(x<20)return a[x];if(x<100)return b[Math.floor(x/10)]+(x%10?' '+a[x%10]:'');if(x<1000)return a[Math.floor(x/100)]+' hundred'+(x%100?' '+w(x%100):'');if(x<1e6)return w(Math.floor(x/1000))+' thousand'+(x%1000?' '+w(x%1000):'');return w(Math.floor(x/1e6))+' million'+(x%1e6?' '+w(x%1e6):'');};return w(Math.floor(n))+' naira only';}
+function amountToWords(n){const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];const b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];if(n===0)return'Zero Naira Only';const w=x=>{if(x<20)return a[x];if(x<100)return b[Math.floor(x/10)]+(x%10?' '+a[x%10]:'');if(x<1000)return a[Math.floor(x/100)]+' Hundred'+(x%100?' '+w(x%100):'');if(x<1e6)return w(Math.floor(x/1000))+' Thousand'+(x%1000?' '+w(x%1000):'');return w(Math.floor(x/1e6))+' Million'+(x%1e6?' '+w(x%1e6):'');};return w(Math.floor(n))+' Naira Only';}
 function buildInvoiceHTML(sales,invNo){
   if(!sales||!sales.length)return'';if(!invNo)invNo='INV#---';
   const client=sales[0].client;const phone=sales[0].phone;
-  const logo=DB.orgLogo?'<img src="'+DB.orgLogo+'" style="height:60px;object-fit:contain;margin-bottom:6px"><br>':'';
+  const logo=DB.orgLogo?'<img src="'+DB.orgLogo+'" style="height:90px;object-fit:contain;margin-bottom:8px"><br>':'';
   const motto=DB.orgMotto&&DB.orgMotto!=='your motto here'?'<div style="font-size:9px;color:#888;font-style:italic;margin-top:2px">'+DB.orgMotto+'</div>':'';
   const addr=DB.orgAddress?'<div style="font-size:10px;color:#555;margin-top:4px;white-space:pre-line">'+DB.orgAddress+'</div>':'';
   let rows='';let grand=0;let wb=0;
