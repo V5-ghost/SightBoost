@@ -241,7 +241,7 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 <div class="app gone" id="app">
   <div class="sidebar">
     <div class="s-logo">
-      <div id="sidebar-logo-img" style="display:none;margin-bottom:4px"><img id="sidebar-logo" style="height:32px;object-fit:contain;max-width:140px"></div>
+      <div id="sidebar-logo-wrap" style="display:none;margin-bottom:4px"><img id="sidebar-logo-img" style="height:32px;object-fit:contain;max-width:150px"></div>
       <div class="s-logo-name" id="sidebar-logo-text">NEO<span style="color:var(--text3)">OPS</span></div>
       <div class="s-logo-sub">Inventory OS</div>
     </div>
@@ -376,7 +376,7 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
         <div id="sales-body"></div>
       </div>
 
-      <!-- ADMIN PRODUCTS -->
+      <!-- SETTINGS -->
       <div class="page" id="page-adminproducts">
         <div class="sec-hdr"><div class="sec-title">Products</div></div>
         <div class="card" style="margin-bottom:14px">
@@ -388,9 +388,7 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
           <div class="card-hdr"><div class="card-title">Product Query</div></div>
           <div class="grid2" style="margin-bottom:14px;align-items:end">
             <div>
-              <div class="fr"><label class="fl">Category</label>
-                <select class="fi fi-sel" id="q-cat"><option value="">All Categories</option></select>
-              </div>
+              <div class="fr"><label class="fl">Category</label><select class="fi fi-sel" id="q-cat"><option value="">All Categories</option></select></div>
               <div class="fr"><label class="fl">Time Frame</label>
                 <select class="fi fi-sel" id="q-period" onchange="handleQPeriod()">
                   <option value="7">Last 7 Days</option>
@@ -407,16 +405,15 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
                 <div><label class="fl">To</label><input class="fi" type="date" id="q-to"></div>
               </div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;padding-bottom:14px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:14px">
               <button class="btn btn-solid" onclick="runQuery()">Run Query</button>
-              <button class="btn" onclick="printQuery()">🖨 Print</button>
+              <button class="btn" onclick="printQuery()" style="display:none" id="print-query-btn">&#x1F5A8; Print</button>
             </div>
           </div>
-          <div id="query-results"></div>
+          <div id="query-results"><div class="empty">Set filters above and click Run Query</div></div>
         </div>
       </div>
 
-      <!-- SETTINGS (merged with Organisation) -->
       <div class="page" id="page-settings">
         <div class="sec-hdr"><div class="sec-title">Settings</div></div>
         <div class="grid2" style="align-items:start">
@@ -434,19 +431,19 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
           </div>
           <div>
             <div class="card" style="margin-bottom:12px">
-              <div class="card-hdr"><div class="card-title">Address & Contact</div></div>
+              <div class="card-hdr"><div class="card-title">Address &amp; Contact</div></div>
               <div class="fr"><label class="fl">Address / Contact Info</label>
                 <textarea class="fi" id="org-address" rows="4" placeholder="12 Main Street, Lagos&#10;Tel: 08012345678" style="resize:vertical"></textarea>
               </div>
-              <button class="btn btn-solid" onclick="saveOrgAddress()">Save Address</button>
+              <button class="btn btn-solid" onclick="saveOrgAddress()">Save</button>
             </div>
             <div class="card" style="margin:0">
-              <div class="card-hdr"><div class="card-title">Backup & Restore</div></div>
-              <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Auto-backup runs daily. Export a local JSON copy anytime.</p>
+              <div class="card-hdr"><div class="card-title">Backup &amp; Restore</div></div>
+              <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Auto-backup runs daily. Export a local copy anytime.</p>
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-                <button class="btn" onclick="exportBackup()">⬇ Export JSON</button>
-                <button class="btn btn-amber" onclick="importBackup()">⬆ Restore</button>
-                <button class="btn btn-green" onclick="manualBackup()">☁ Backup Now</button>
+                <button class="btn" onclick="exportBackup()">&#x2B07; Export JSON</button>
+                <button class="btn btn-amber" onclick="importBackup()">&#x2B06; Restore</button>
+                <button class="btn btn-green" onclick="manualBackup()">&#x2601; Backup Now</button>
               </div>
               <div style="font-size:10px;color:var(--text3)" id="backup-lbl">Last backup: checking...</div>
             </div>
@@ -502,6 +499,7 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
         </div>
       </div>
 
+      <!-- ORGANISATION -->
 
     </div>
   </div>
@@ -735,8 +733,8 @@ async function initApp(){
 
   // clear status immediately — don't make user wait
   document.getElementById('w-status').textContent='';
-  document.getElementById('w-status').textContent='';
   setTimeout(updateSidebarLogo,100);
+  document.getElementById('w-org').textContent=DB.orgName||'Organisation';
   document.getElementById('w-motto').textContent=DB.orgMotto||'your motto here';
 
   // 2. Try Firebase with 3s timeout — fail gracefully if Firestore not set up
@@ -823,7 +821,7 @@ window.goRoot=goRoot;
 function showPageOnly(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  const titles={overview:'OVERVIEW',issuance:'ISSUE STOCK',sales:'SALES',adminproducts:'PRODUCTS',settings:'SETTINGS',archive:'ARCHIVES',invoices:'INVOICES',logs:'ACTIVITY LOG',users:'USERS'};
+  const titles={overview:'OVERVIEW',issuance:'ISSUE STOCK',sales:'SALES',adminproducts:'PRODUCTS',settings:'SETTINGS',archive:'ARCHIVES',invoices:'INVOICES',logs:'ACTIVITY LOG',users:'USERS',organisation:'SETTINGS'};
   document.getElementById('page-title').textContent=titles[page]||page.toUpperCase();
   renderPage(page);
 }
@@ -845,7 +843,7 @@ function renderPage(p){
   else if(p==='invoices')renderInvoices();
   else if(p==='logs')renderLogs();
   else if(p==='users')renderUsers();
-  else if(p==='organisation')renderSettings(); // fallback for old links
+  else if(p==='organisation')renderSettings();
 }
 
 // ─── SIDEBAR TOGGLE ──────────────────────────────────────────────
@@ -948,21 +946,13 @@ window.enterApp=async function(){
 document.getElementById('logo-area').addEventListener('click',()=>document.getElementById('logo-input').click());
 document.getElementById('logo-input').addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();r.onload=ev=>{
-    DB.orgLogo=ev.target.result;
-    const img=document.getElementById('logo-preview');img.src=DB.orgLogo;img.style.display='block';
-    document.getElementById('logo-hint').style.display='none';
-    updateSidebarLogo();
-    saveDB();
-  };r.readAsDataURL(f);
+  const r=new FileReader();r.onload=ev=>{DB.orgLogo=ev.target.result;const img=document.getElementById('logo-preview');img.src=DB.orgLogo;img.style.display='block';document.getElementById('logo-hint').style.display='none';updateSidebarLogo();saveDB();};r.readAsDataURL(f);
 });
 function updateSidebarLogo(){
-  const sl=document.getElementById('sidebar-logo');
-  const sw=document.getElementById('sidebar-logo-img');
-  const st=document.getElementById('sidebar-logo-text');
-  if(!sl||!sw||!st)return;
-  if(DB.orgLogo){sl.src=DB.orgLogo;sw.style.display='block';st.style.display='none';}
-  else{sw.style.display='none';st.style.display='';}
+  const w=document.getElementById('sidebar-logo-wrap');const i=document.getElementById('sidebar-logo-img');const t=document.getElementById('sidebar-logo-text');
+  if(!w)return;
+  if(DB.orgLogo){i.src=DB.orgLogo;w.style.display='block';if(t)t.style.display='none';}
+  else{w.style.display='none';if(t)t.style.display='';}
 }
 ['w-org','w-motto'].forEach(id=>{
   const el=document.getElementById(id);
@@ -1193,6 +1183,12 @@ window.printIssReceipt=function(id){
   w.document.write('<!DOCTYPE html><html><head><title>'+secCode+'</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;font-family:Arial,sans-serif;width:210mm}table{border-collapse:collapse;width:100%}@media print{@page{size:A4 portrait;margin:10mm}body{width:210mm}}</style></head><body>'+html+'</body></html>');
   w.document.close();setTimeout(()=>{w.focus();w.print();},500);
 };
+    +'</div>'+microBar+'</div>';
+  const w=window.open('','_blank','width=700,height=900');
+  if(!w){alert('Please allow popups.');return;}
+  w.document.write('<!DOCTYPE html><html><head><title>Issuance Receipt</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;font-family:Arial,sans-serif;width:210mm;min-height:297mm}table{border-collapse:collapse;width:100%}@media print{@page{size:A4 portrait;margin:10mm}body{width:210mm}}</style></head><body>'+html+'</body></html>');
+  w.document.close();setTimeout(()=>{w.focus();w.print();},400);
+};
 
 // ─── SALES ───────────────────────────────────────────────────────
 function renderSales(){
@@ -1266,7 +1262,8 @@ function renderLogs(){
   el.innerHTML=logs.map(l=>'<div class="log-item"><div class="log-dot" style="background:'+(c[l.type]||c.info)+'"></div><div style="flex:1"><div style="font-size:12px">'+l.msg+'</div><div style="font-size:10px;color:var(--text3);display:flex;gap:12px"><span>'+fmtT(l.time)+'</span>'+(l.user?'<span style="color:var(--accent)">'+l.user+'</span>':'')+'</div></div></div>').join('');
 }
 
-// ─── SETTINGS (merged with Organisation) ─────────────────────────
+// ─── SETTINGS ────────────────────────────────────────────────────
+// ─── ORGANISATION PAGE ───────────────────────────────────────────
 function renderOrganisation(){renderSettings();}
 window.saveOrgAddress=function(){
   DB.orgAddress=document.getElementById('org-address')?.value||'';
@@ -1281,13 +1278,10 @@ function renderSettings(){
 
 // ─── ADMIN PRODUCTS + QUERY ──────────────────────────────────────
 function renderAdminProducts(){
-  // populate category dropdown
   const sel=document.getElementById('q-cat');if(!sel)return;
   const cur=sel.value;
   sel.innerHTML='<option value="">All Categories</option>';
   (DB.categories||[]).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;if(c===cur)o.selected=true;sel.appendChild(o);});
-  // clear results
-  document.getElementById('query-results').innerHTML='<div class="empty">Set filters above and click Run Query</div>';
 }
 window.handleQPeriod=function(){
   const v=document.getElementById('q-period').value;
@@ -1296,91 +1290,68 @@ window.handleQPeriod=function(){
 window.runQuery=function(){
   const cat=document.getElementById('q-cat').value;
   const period=document.getElementById('q-period').value;
-  let from,to=new Date();
+  let from,to=new Date();to.setHours(23,59,59,999);
   if(period==='all'){from=new Date('2000-01-01');}
   else if(period==='custom'){
-    from=new Date(document.getElementById('q-from').value);
-    to=new Date(document.getElementById('q-to').value);
-    if(isNaN(from)||isNaN(to)){alert('Set valid custom dates.');return;}
-    to.setHours(23,59,59,999);
-  } else {
-    from=new Date();from.setDate(from.getDate()-parseInt(period));
-  }
+    const fv=document.getElementById('q-from').value;const tv=document.getElementById('q-to').value;
+    if(!fv||!tv){alert('Set both custom dates.');return;}
+    from=new Date(fv);to=new Date(tv);to.setHours(23,59,59,999);
+  } else {from=new Date();from.setDate(from.getDate()-parseInt(period));}
 
-  // gather products (optionally filtered by cat)
   const prods=(DB.products||[]).filter(p=>!p.archived&&(!cat||p.category===cat));
+  const allSales=(DB.sales||[]).concat((DB.pastInvoices||[]).flatMap(inv=>(inv.items||[])));
 
-  // build per-product stats from sales within date range
   const rows=prods.map(p=>{
-    const sales=(DB.sales||[]).concat((DB.pastInvoices||[]).flatMap(inv=>inv.items||[]))
-      .filter(s=>s.product===p.name&&s.time&&new Date(s.time)>=from&&new Date(s.time)<=to);
-    const unitsSold=sales.reduce((a,s)=>a+s.qty,0);
+    const sales=allSales.filter(s=>s.product===p.name&&s.time&&new Date(s.time)>=from&&new Date(s.time)<=to);
+    const unitsSold=sales.reduce((a,s)=>a+(s.qty||0),0);
     const revenue=sales.reduce((a,s)=>a+(s.subtotal||0),0);
-    const costPrice=p.price||0;
-    const cogs=unitsSold*costPrice;
+    const cogs=unitsSold*(p.price||0);
     const profit=revenue-cogs;
-    const currentStock=((p.batches||[]).reduce((a,b)=>a+b.qty,0));
-    const stockValue=currentStock*(p.price||0);
-    const retailValue=currentStock*(p.retailPrice||p.price||0);
-    return{name:p.name,category:p.category,unitsSold,revenue,cogs,profit,currentStock,stockValue,retailValue,margin:revenue>0?Math.round(profit/revenue*100):0};
-  });
+    const stock=(p.batches||[]).reduce((a,b)=>a+b.qty,0);
+    const stockVal=stock*(p.price||0);
+    const margin=revenue>0?Math.round(profit/revenue*100):0;
+    return{name:p.name,cat:p.category,unitsSold,revenue,cogs,profit,stock,stockVal,margin};
+  }).filter(r=>r.unitsSold>0||true).sort((a,b)=>b.revenue-a.revenue);
 
-  // sort by revenue desc
-  rows.sort((a,b)=>b.revenue-a.revenue);
-
-  const totalRevenue=rows.reduce((a,r)=>a+r.revenue,0);
-  const totalCogs=rows.reduce((a,r)=>a+r.cogs,0);
-  const totalProfit=rows.reduce((a,r)=>a+r.profit,0);
-  const totalUnits=rows.reduce((a,r)=>a+r.unitsSold,0);
-
-  const label=period==='all'?'All Time':period==='custom'?from.toLocaleDateString()+' – '+to.toLocaleDateString():'Last '+period+' days';
+  const totR=rows.reduce((a,r)=>a+r.revenue,0);
+  const totC=rows.reduce((a,r)=>a+r.cogs,0);
+  const totP=rows.reduce((a,r)=>a+r.profit,0);
+  const totU=rows.reduce((a,r)=>a+r.unitsSold,0);
+  const lbl=period==='all'?'All Time':period==='custom'?from.toLocaleDateString()+' \u2013 '+to.toLocaleDateString():'Last '+period+' days';
 
   let html='<div style="background:var(--accent3);border:1px solid var(--border2);border-radius:6px;padding:14px;margin-bottom:14px">'
-    +'<div style="font-size:10px;color:var(--text2);letter-spacing:1px;margin-bottom:10px">SUMMARY — '+label+(cat?' — '+cat:'')+'</div>'
+    +'<div style="font-size:10px;color:var(--text2);letter-spacing:1px;margin-bottom:10px">SUMMARY \u2014 '+lbl+(cat?' \u2014 '+cat:'')+'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'
-    +['<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Units Sold</div><div style="font-size:20px;font-weight:700;color:var(--accent)">'+totalUnits.toLocaleString()+'</div></div>',
-      '<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Revenue</div><div style="font-size:18px;font-weight:700;color:var(--accent)">₦'+totalRevenue.toLocaleString()+'</div></div>',
-      '<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Cost</div><div style="font-size:18px;font-weight:700;color:var(--red)">₦'+totalCogs.toLocaleString()+'</div></div>',
-      '<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Profit</div><div style="font-size:18px;font-weight:700;color:'+(totalProfit>=0?'var(--accent)':'var(--red)')+'">₦'+totalProfit.toLocaleString()+'</div></div>'
-    ].join('')+'</div></div>';
+    +'<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Units Sold</div><div style="font-size:20px;font-weight:700;color:var(--accent)">'+totU.toLocaleString()+'</div></div>'
+    +'<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Revenue</div><div style="font-size:18px;font-weight:700;color:var(--accent)">\u20a6'+totR.toLocaleString()+'</div></div>'
+    +'<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Cost</div><div style="font-size:18px;font-weight:700;color:var(--red)">\u20a6'+totC.toLocaleString()+'</div></div>'
+    +'<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Profit</div><div style="font-size:18px;font-weight:700;color:'+(totP>=0?'var(--accent)':'var(--red)')+'"><b>\u20a6'+totP.toLocaleString()+'</b></div></div>'
+    +'</div></div>'
+    +'<table class="tbl"><thead><tr><th>Product</th><th>Category</th><th>Units Sold</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th><th>Stock</th><th>Stock Value</th></tr></thead><tbody>'
+    +rows.map(r=>'<tr>'
+      +'<td style="font-weight:500">'+r.name+'</td>'
+      +'<td><span class="badge badge-gray">'+r.cat+'</span></td>'
+      +'<td style="text-align:center">'+r.unitsSold+'</td>'
+      +'<td>\u20a6'+r.revenue.toLocaleString()+'</td>'
+      +'<td>\u20a6'+r.cogs.toLocaleString()+'</td>'
+      +'<td style="color:'+(r.profit>=0?'var(--accent)':'var(--red)')+'"><b>\u20a6'+r.profit.toLocaleString()+'</b></td>'
+      +'<td style="color:'+(r.margin>=30?'var(--accent)':r.margin>0?'var(--amber)':'var(--red)')+'">'+r.margin+'%</td>'
+      +'<td>'+r.stock+'</td>'
+      +'<td>\u20a6'+r.stockVal.toLocaleString()+'</td>'
+      +'</tr>').join('')
+    +'</tbody></table>';
 
-  if(!rows.length){html+='<div class="empty">No products found.</div>';}
-  else{
-    html+='<table class="tbl"><thead><tr><th>Product</th><th>Category</th><th>Units Sold</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th><th>Stock</th><th>Stock Value</th></tr></thead><tbody>'
-      +rows.map(r=>'<tr><td style="font-weight:500">'+r.name+'</td><td><span class="badge badge-gray">'+r.category+'</span></td>'
-        +'<td style="text-align:center">'+r.unitsSold+'</td>'
-        +'<td>₦'+r.revenue.toLocaleString()+'</td>'
-        +'<td>₦'+r.cogs.toLocaleString()+'</td>'
-        +'<td style="color:'+(r.profit>=0?'var(--accent)':'var(--red)')+'">₦'+r.profit.toLocaleString()+'</td>'
-        +'<td style="color:'+(r.margin>=30?'var(--accent)':r.margin>0?'var(--amber)':'var(--red)')+'">'+r.margin+'%</td>'
-        +'<td>'+r.currentStock+'</td>'
-        +'<td>₦'+r.stockValue.toLocaleString()+'</td>'
-        +'</tr>').join('')
-      +'</tbody></table>';
-  }
   document.getElementById('query-results').innerHTML=html;
-  window._lastQueryHTML=html;window._lastQueryLabel=label;window._lastQueryCat=cat||'All';
+  document.getElementById('print-query-btn').style.display='';
+  window._qHTML=html;window._qLabel=lbl;window._qCat=cat||'All';
 };
-
 window.printQuery=function(){
-  const html=window._lastQueryHTML;
-  if(!html){alert('Run a query first.');return;}
-  const label=window._lastQueryLabel||'';const cat=window._lastQueryCat||'All';
-  const w=window.open('','_blank','width=900,height=700');
-  if(!w){alert('Please allow popups.');return;}
-  w.document.write('<!DOCTYPE html><html><head><title>Query Report</title>'
-    +'<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:12px;padding:20px;color:#111}'
-    +'table{width:100%;border-collapse:collapse;margin-top:12px}'
-    +'th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}'
-    +'th{background:#f0f0f0}h1{font-size:16px;margin-bottom:4px}p{color:#555;font-size:11px;margin-bottom:12px}'
-    +'@page{size:A4 landscape;margin:10mm}'
-    +'</style></head><body>'
-    +'<h1>'+(DB.orgName||'Organisation')+' — Product Query Report</h1>'
-    +'<p>Period: '+label+' &nbsp;|&nbsp; Category: '+cat+'</p>'
-    +html+'</body></html>');
+  if(!window._qHTML){alert('Run a query first.');return;}
+  const w=window.open('','_blank','width=1000,height=700');
+  if(!w){alert('Allow popups.');return;}
+  w.document.write('<!DOCTYPE html><html><head><title>Query Report</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:11px;padding:16px;color:#111}h2{font-size:14px;margin-bottom:4px}p{color:#555;font-size:10px;margin-bottom:10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:5px 7px;text-align:left}th{background:#f0f0f0}@page{size:A4 landscape;margin:10mm}</style></head><body><h2>'+(DB.orgName||'Organisation')+' \u2014 Product Query</h2><p>Period: '+window._qLabel+' | Category: '+window._qCat+'</p>'+window._qHTML+'</body></html>');
   w.document.close();setTimeout(()=>{w.focus();w.print();},400);
 };
-}
 window.addCat=function(){if(!DB.categories)DB.categories=[];const v=document.getElementById('new-cat').value.trim();if(!v||DB.categories.includes(v))return;DB.categories.push(v);addLog('Category added: '+v,'cyan');saveDB();document.getElementById('new-cat').value='';renderSettings();};
 window.removeCat=function(c){DB.categories=(DB.categories||[]).filter(x=>x!==c);addLog('Category removed: '+c,'red');saveDB();renderSettings();};
 window.addDept=function(){if(!DB.departments)DB.departments=[];const v=document.getElementById('new-dept').value.trim();if(!v||DB.departments.includes(v))return;DB.departments.push(v);addLog('Department added: '+v,'cyan');saveDB();document.getElementById('new-dept').value='';renderSettings();populateDeptSel();};
