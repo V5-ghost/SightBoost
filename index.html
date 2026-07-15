@@ -241,7 +241,7 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 <div class="app gone" id="app">
   <div class="sidebar">
     <div class="s-logo">
-      <div id="sidebar-logo-wrap" style="display:none;margin-bottom:4px"><img id="sidebar-logo-img" style="height:32px;object-fit:contain;max-width:150px"></div>
+      <div id="sidebar-logo-img" style="display:none;margin-bottom:4px"><img id="sidebar-logo" style="height:32px;object-fit:contain;max-width:140px"></div>
       <div class="s-logo-name" id="sidebar-logo-text">NEO<span style="color:var(--text3)">OPS</span></div>
       <div class="s-logo-sub">Inventory OS</div>
     </div>
@@ -376,7 +376,7 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
         <div id="sales-body"></div>
       </div>
 
-      <!-- SETTINGS -->
+      <!-- ADMIN PRODUCTS -->
       <div class="page" id="page-adminproducts">
         <div class="sec-hdr"><div class="sec-title">Products</div></div>
         <div class="card" style="margin-bottom:14px">
@@ -388,7 +388,9 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
           <div class="card-hdr"><div class="card-title">Product Query</div></div>
           <div class="grid2" style="margin-bottom:14px;align-items:end">
             <div>
-              <div class="fr"><label class="fl">Category</label><select class="fi fi-sel" id="q-cat"><option value="">All Categories</option></select></div>
+              <div class="fr"><label class="fl">Category</label>
+                <select class="fi fi-sel" id="q-cat"><option value="">All Categories</option></select>
+              </div>
               <div class="fr"><label class="fl">Time Frame</label>
                 <select class="fi fi-sel" id="q-period" onchange="handleQPeriod()">
                   <option value="7">Last 7 Days</option>
@@ -405,15 +407,16 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
                 <div><label class="fl">To</label><input class="fi" type="date" id="q-to"></div>
               </div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:14px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;padding-bottom:14px">
               <button class="btn btn-solid" onclick="runQuery()">Run Query</button>
-              <button class="btn" onclick="printQuery()" style="display:none" id="print-query-btn">&#x1F5A8; Print</button>
+              <button class="btn" onclick="printQuery()">🖨 Print</button>
             </div>
           </div>
-          <div id="query-results"><div class="empty">Set filters above and click Run Query</div></div>
+          <div id="query-results"></div>
         </div>
       </div>
 
+      <!-- SETTINGS (merged with Organisation) -->
       <div class="page" id="page-settings">
         <div class="sec-hdr"><div class="sec-title">Settings</div></div>
         <div class="grid2" style="align-items:start">
@@ -431,19 +434,19 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
           </div>
           <div>
             <div class="card" style="margin-bottom:12px">
-              <div class="card-hdr"><div class="card-title">Address &amp; Contact</div></div>
+              <div class="card-hdr"><div class="card-title">Address & Contact</div></div>
               <div class="fr"><label class="fl">Address / Contact Info</label>
                 <textarea class="fi" id="org-address" rows="4" placeholder="12 Main Street, Lagos&#10;Tel: 08012345678" style="resize:vertical"></textarea>
               </div>
-              <button class="btn btn-solid" onclick="saveOrgAddress()">Save</button>
+              <button class="btn btn-solid" onclick="saveOrgAddress()">Save Address</button>
             </div>
             <div class="card" style="margin:0">
-              <div class="card-hdr"><div class="card-title">Backup &amp; Restore</div></div>
-              <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Auto-backup runs daily. Export a local copy anytime.</p>
+              <div class="card-hdr"><div class="card-title">Backup & Restore</div></div>
+              <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Auto-backup runs daily. Export a local JSON copy anytime.</p>
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-                <button class="btn" onclick="exportBackup()">&#x2B07; Export JSON</button>
-                <button class="btn btn-amber" onclick="importBackup()">&#x2B06; Restore</button>
-                <button class="btn btn-green" onclick="manualBackup()">&#x2601; Backup Now</button>
+                <button class="btn" onclick="exportBackup()">⬇ Export JSON</button>
+                <button class="btn btn-amber" onclick="importBackup()">⬆ Restore</button>
+                <button class="btn btn-green" onclick="manualBackup()">☁ Backup Now</button>
               </div>
               <div style="font-size:10px;color:var(--text3)" id="backup-lbl">Last backup: checking...</div>
             </div>
@@ -499,7 +502,6 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
         </div>
       </div>
 
-      <!-- ORGANISATION -->
 
     </div>
   </div>
@@ -728,12 +730,12 @@ async function initApp(){
       document.getElementById('w-org').textContent=DB.orgName||'Organisation';
       document.getElementById('w-motto').textContent=DB.orgMotto||'your motto here';
       if(DB.orgLogo){const img=document.getElementById('logo-preview');img.src=DB.orgLogo;img.style.display='block';document.getElementById('logo-hint').style.display='none';}
+      syncSidebarLogo();
     }
   }catch(e){}
 
   // clear status immediately — don't make user wait
   document.getElementById('w-status').textContent='';
-  setTimeout(updateSidebarLogo,100);
   document.getElementById('w-org').textContent=DB.orgName||'Organisation';
   document.getElementById('w-motto').textContent=DB.orgMotto||'your motto here';
 
@@ -749,6 +751,7 @@ async function initApp(){
         document.getElementById('w-org').textContent=DB.orgName||'Organisation';
         document.getElementById('w-motto').textContent=DB.orgMotto||'your motto here';
         if(DB.orgLogo){const img=document.getElementById('logo-preview');img.src=DB.orgLogo;img.style.display='block';document.getElementById('logo-hint').style.display='none';}
+        syncSidebarLogo();
       }
     }
     setSyncUI('ok');setSaveUI('saved');
@@ -765,6 +768,7 @@ async function initApp(){
       DB=Object.assign({products:[],categories:[],departments:[],passwords:{},users:[],logs:[],sales:[],pastInvoices:[],issuances:[],clients:[],orgName:'Organisation',orgMotto:'',orgAddress:'',orgLogo:null,invCounter:0},remote);
       try{localStorage.setItem('neoops_data',JSON.stringify(DB));}catch(_){}
       setSyncUI('ok');
+      syncSidebarLogo();
       if(!document.getElementById('app').classList.contains('gone'))renderCurrentPage();
     },(err)=>{console.warn('Snapshot:',err.message);setSyncUI('err');});
   }catch(e){}
@@ -778,6 +782,12 @@ const fmtP=n=>(n&&n>0)?'₦'+Number(n).toLocaleString():'nil';
 const fmtT=iso=>{if(!iso)return'—';const d=new Date(iso);return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});};
 const fmtBatch=exp=>{const d=exp?new Date(exp+'T00:00:00'):new Date();return'Batch'+String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getFullYear()).slice(2);};
 const roundTo10=n=>Math.round(n/10)*10;
+function syncSidebarLogo(){
+  const wrap=document.getElementById('sidebar-logo-img');const img=document.getElementById('sidebar-logo');
+  if(!wrap||!img)return;
+  if(DB.orgLogo){img.src=DB.orgLogo;wrap.style.display='block';}
+  else{wrap.style.display='none';}
+}
 const openOv=id=>document.getElementById(id).classList.add('open');
 const closeOv=id=>document.getElementById(id).classList.remove('open');
 window.closeOv=closeOv;
@@ -821,7 +831,7 @@ window.goRoot=goRoot;
 function showPageOnly(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  const titles={overview:'OVERVIEW',issuance:'ISSUE STOCK',sales:'SALES',adminproducts:'PRODUCTS',settings:'SETTINGS',archive:'ARCHIVES',invoices:'INVOICES',logs:'ACTIVITY LOG',users:'USERS',organisation:'SETTINGS'};
+  const titles={overview:'OVERVIEW',issuance:'ISSUE STOCK',sales:'SALES',adminproducts:'PRODUCTS',settings:'SETTINGS',archive:'ARCHIVES',invoices:'INVOICES',logs:'ACTIVITY LOG',users:'USERS'};
   document.getElementById('page-title').textContent=titles[page]||page.toUpperCase();
   renderPage(page);
 }
@@ -843,7 +853,7 @@ function renderPage(p){
   else if(p==='invoices')renderInvoices();
   else if(p==='logs')renderLogs();
   else if(p==='users')renderUsers();
-  else if(p==='organisation')renderSettings();
+  else if(p==='organisation')renderSettings(); // fallback for old links
 }
 
 // ─── SIDEBAR TOGGLE ──────────────────────────────────────────────
@@ -934,6 +944,7 @@ window.enterApp=async function(){
   if(m&&m!=='your motto here')DB.orgMotto=m;
   saveDB();
   document.getElementById('welcome').classList.add('gone');
+  syncSidebarLogo();
   // if users exist, show login screen first
   if(DB.users&&DB.users.length>0){
     showUserLogin();
@@ -946,14 +957,8 @@ window.enterApp=async function(){
 document.getElementById('logo-area').addEventListener('click',()=>document.getElementById('logo-input').click());
 document.getElementById('logo-input').addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();r.onload=ev=>{DB.orgLogo=ev.target.result;const img=document.getElementById('logo-preview');img.src=DB.orgLogo;img.style.display='block';document.getElementById('logo-hint').style.display='none';updateSidebarLogo();saveDB();};r.readAsDataURL(f);
+  const r=new FileReader();r.onload=ev=>{DB.orgLogo=ev.target.result;const img=document.getElementById('logo-preview');img.src=DB.orgLogo;img.style.display='block';document.getElementById('logo-hint').style.display='none';syncSidebarLogo();saveDB();};r.readAsDataURL(f);
 });
-function updateSidebarLogo(){
-  const w=document.getElementById('sidebar-logo-wrap');const i=document.getElementById('sidebar-logo-img');const t=document.getElementById('sidebar-logo-text');
-  if(!w)return;
-  if(DB.orgLogo){i.src=DB.orgLogo;w.style.display='block';if(t)t.style.display='none';}
-  else{w.style.display='none';if(t)t.style.display='';}
-}
 ['w-org','w-motto'].forEach(id=>{
   const el=document.getElementById(id);
   el.addEventListener('click',()=>{el.contentEditable='true';el.focus();});
@@ -1183,12 +1188,6 @@ window.printIssReceipt=function(id){
   w.document.write('<!DOCTYPE html><html><head><title>'+secCode+'</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;font-family:Arial,sans-serif;width:210mm}table{border-collapse:collapse;width:100%}@media print{@page{size:A4 portrait;margin:10mm}body{width:210mm}}</style></head><body>'+html+'</body></html>');
   w.document.close();setTimeout(()=>{w.focus();w.print();},500);
 };
-    +'</div>'+microBar+'</div>';
-  const w=window.open('','_blank','width=700,height=900');
-  if(!w){alert('Please allow popups.');return;}
-  w.document.write('<!DOCTYPE html><html><head><title>Issuance Receipt</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;font-family:Arial,sans-serif;width:210mm;min-height:297mm}table{border-collapse:collapse;width:100%}@media print{@page{size:A4 portrait;margin:10mm}body{width:210mm}}</style></head><body>'+html+'</body></html>');
-  w.document.close();setTimeout(()=>{w.focus();w.print();},400);
-};
 
 // ─── SALES ───────────────────────────────────────────────────────
 function renderSales(){
@@ -1214,7 +1213,7 @@ function amountToWords(n){const a=['','One','Two','Three','Four','Five','Six','S
 function buildInvoiceHTML(sales,invNo){
   if(!sales||!sales.length)return'';if(!invNo)invNo='INV#---';
   const client=sales[0].client;const phone=sales[0].phone;
-  const logo=DB.orgLogo?'<img src="'+DB.orgLogo+'" style="height:90px;object-fit:contain;margin-bottom:8px"><br>':'';
+  const logo=DB.orgLogo?'<img src="'+DB.orgLogo+'" style="height:112px;object-fit:contain;margin-bottom:8px"><br>':'';
   const motto=DB.orgMotto&&DB.orgMotto!=='your motto here'?'<div style="font-size:9px;color:#888;font-style:italic;margin-top:2px">'+DB.orgMotto+'</div>':'';
   const addr=DB.orgAddress?'<div style="font-size:10px;color:#555;margin-top:4px;white-space:pre-line">'+DB.orgAddress+'</div>':'';
   let rows='';let grand=0;let wb=0;
@@ -1262,96 +1261,113 @@ function renderLogs(){
   el.innerHTML=logs.map(l=>'<div class="log-item"><div class="log-dot" style="background:'+(c[l.type]||c.info)+'"></div><div style="flex:1"><div style="font-size:12px">'+l.msg+'</div><div style="font-size:10px;color:var(--text3);display:flex;gap:12px"><span>'+fmtT(l.time)+'</span>'+(l.user?'<span style="color:var(--accent)">'+l.user+'</span>':'')+'</div></div></div>').join('');
 }
 
-// ─── SETTINGS ────────────────────────────────────────────────────
-// ─── ORGANISATION PAGE ───────────────────────────────────────────
-function renderOrganisation(){renderSettings();}
-window.saveOrgAddress=function(){
-  DB.orgAddress=document.getElementById('org-address')?.value||'';
-  addLog('Address updated','cyan');saveDB();
-};
-function renderSettings(){
-  const el=document.getElementById('org-address');if(el)el.value=DB.orgAddress||'';
-  const bl=document.getElementById('backup-lbl');if(bl)bl.textContent='Last backup: '+(localStorage.getItem('neoops_last_backup')||'never');
-  document.getElementById('cat-list').innerHTML=(DB.categories||[]).length?(DB.categories||[]).map(c=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:3px;margin-bottom:6px"><span>'+c+'</span><button class="btn btn-sm btn-red" onclick="removeCat(\''+c+'\')">Remove</button></div>').join(''):'<div class="empty">no categories</div>';
-  document.getElementById('dept-list').innerHTML=(DB.departments||[]).length?(DB.departments||[]).map(d=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:3px;margin-bottom:6px"><span>'+d+'</span><button class="btn btn-sm btn-red" onclick="removeDept(\''+d+'\')">Remove</button></div>').join(''):'<div class="empty">no departments</div>';
-}
-
-// ─── ADMIN PRODUCTS + QUERY ──────────────────────────────────────
+// ─── ADMIN › PRODUCTS (Add Product + Query) ──────────────────────
 function renderAdminProducts(){
-  const sel=document.getElementById('q-cat');if(!sel)return;
-  const cur=sel.value;
-  sel.innerHTML='<option value="">All Categories</option>';
-  (DB.categories||[]).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;if(c===cur)o.selected=true;sel.appendChild(o);});
+  const sel=document.getElementById('q-cat');
+  if(sel){
+    const cur=sel.value;
+    sel.innerHTML='<option value="">All Categories</option>'+(DB.categories||[]).map(c=>'<option>'+c+'</option>').join('');
+    sel.value=cur||'';
+  }
+  handleQPeriod();
+  runQuery();
 }
 window.handleQPeriod=function(){
-  const v=document.getElementById('q-period').value;
-  document.getElementById('q-custom-wrap').style.display=v==='custom'?'grid':'none';
+  const p=document.getElementById('q-period')?.value;
+  const wrap=document.getElementById('q-custom-wrap');
+  if(!wrap)return;
+  wrap.style.display=(p==='custom')?'flex':'none';
+  if(p==='custom'){
+    const to=document.getElementById('q-to');const from=document.getElementById('q-from');
+    if(to&&!to.value)to.value=new Date().toISOString().slice(0,10);
+    if(from&&!from.value){const d=new Date();d.setDate(d.getDate()-30);from.value=d.toISOString().slice(0,10);}
+  }
 };
+function getQueryRange(){
+  const period=document.getElementById('q-period')?.value||'30';
+  if(period==='all')return{from:null,to:null};
+  if(period==='custom'){
+    const fromV=document.getElementById('q-from')?.value;const toV=document.getElementById('q-to')?.value;
+    const from=fromV?new Date(fromV+'T00:00:00'):null;
+    const to=toV?new Date(toV+'T23:59:59'):new Date();
+    return{from,to};
+  }
+  const days=parseInt(period)||30;
+  const to=new Date();const from=new Date();from.setDate(from.getDate()-days);from.setHours(0,0,0,0);
+  return{from,to};
+}
+let lastQueryRows=[];let lastQueryMeta={};
 window.runQuery=function(){
-  const cat=document.getElementById('q-cat').value;
-  const period=document.getElementById('q-period').value;
-  let from,to=new Date();to.setHours(23,59,59,999);
-  if(period==='all'){from=new Date('2000-01-01');}
-  else if(period==='custom'){
-    const fv=document.getElementById('q-from').value;const tv=document.getElementById('q-to').value;
-    if(!fv||!tv){alert('Set both custom dates.');return;}
-    from=new Date(fv);to=new Date(tv);to.setHours(23,59,59,999);
-  } else {from=new Date();from.setDate(from.getDate()-parseInt(period));}
-
-  const prods=(DB.products||[]).filter(p=>!p.archived&&(!cat||p.category===cat));
-  const allSales=(DB.sales||[]).concat((DB.pastInvoices||[]).flatMap(inv=>(inv.items||[])));
-
+  const catFilter=document.getElementById('q-cat')?.value||'';
+  const{from,to}=getQueryRange();
+  const inRange=iso=>{if(!iso)return false;const t=new Date(iso);if(from&&t<from)return false;if(to&&t>to)return false;return true;};
+  let prods=(DB.products||[]).filter(p=>!p.archived);
+  if(catFilter)prods=prods.filter(p=>p.category===catFilter);
   const rows=prods.map(p=>{
-    const sales=allSales.filter(s=>s.product===p.name&&s.time&&new Date(s.time)>=from&&new Date(s.time)<=to);
+    const sales=(DB.sales||[]).filter(s=>s.product===p.name&&inRange(s.time));
     const unitsSold=sales.reduce((a,s)=>a+(s.qty||0),0);
     const revenue=sales.reduce((a,s)=>a+(s.subtotal||0),0);
-    const cogs=unitsSold*(p.price||0);
-    const profit=revenue-cogs;
-    const stock=(p.batches||[]).reduce((a,b)=>a+b.qty,0);
-    const stockVal=stock*(p.price||0);
-    const margin=revenue>0?Math.round(profit/revenue*100):0;
-    return{name:p.name,cat:p.category,unitsSold,revenue,cogs,profit,stock,stockVal,margin};
-  }).filter(r=>r.unitsSold>0||true).sort((a,b)=>b.revenue-a.revenue);
-
-  const totR=rows.reduce((a,r)=>a+r.revenue,0);
-  const totC=rows.reduce((a,r)=>a+r.cogs,0);
-  const totP=rows.reduce((a,r)=>a+r.profit,0);
-  const totU=rows.reduce((a,r)=>a+r.unitsSold,0);
-  const lbl=period==='all'?'All Time':period==='custom'?from.toLocaleDateString()+' \u2013 '+to.toLocaleDateString():'Last '+period+' days';
-
-  let html='<div style="background:var(--accent3);border:1px solid var(--border2);border-radius:6px;padding:14px;margin-bottom:14px">'
-    +'<div style="font-size:10px;color:var(--text2);letter-spacing:1px;margin-bottom:10px">SUMMARY \u2014 '+lbl+(cat?' \u2014 '+cat:'')+'</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'
-    +'<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Units Sold</div><div style="font-size:20px;font-weight:700;color:var(--accent)">'+totU.toLocaleString()+'</div></div>'
-    +'<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Revenue</div><div style="font-size:18px;font-weight:700;color:var(--accent)">\u20a6'+totR.toLocaleString()+'</div></div>'
-    +'<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Cost</div><div style="font-size:18px;font-weight:700;color:var(--red)">\u20a6'+totC.toLocaleString()+'</div></div>'
-    +'<div style="text-align:center"><div style="font-size:10px;color:var(--text2)">Profit</div><div style="font-size:18px;font-weight:700;color:'+(totP>=0?'var(--accent)':'var(--red)')+'"><b>\u20a6'+totP.toLocaleString()+'</b></div></div>'
-    +'</div></div>'
-    +'<table class="tbl"><thead><tr><th>Product</th><th>Category</th><th>Units Sold</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th><th>Stock</th><th>Stock Value</th></tr></thead><tbody>'
-    +rows.map(r=>'<tr>'
-      +'<td style="font-weight:500">'+r.name+'</td>'
-      +'<td><span class="badge badge-gray">'+r.cat+'</span></td>'
-      +'<td style="text-align:center">'+r.unitsSold+'</td>'
-      +'<td>\u20a6'+r.revenue.toLocaleString()+'</td>'
-      +'<td>\u20a6'+r.cogs.toLocaleString()+'</td>'
-      +'<td style="color:'+(r.profit>=0?'var(--accent)':'var(--red)')+'"><b>\u20a6'+r.profit.toLocaleString()+'</b></td>'
-      +'<td style="color:'+(r.margin>=30?'var(--accent)':r.margin>0?'var(--amber)':'var(--red)')+'">'+r.margin+'%</td>'
-      +'<td>'+r.stock+'</td>'
-      +'<td>\u20a6'+r.stockVal.toLocaleString()+'</td>'
-      +'</tr>').join('')
-    +'</tbody></table>';
-
-  document.getElementById('query-results').innerHTML=html;
-  document.getElementById('print-query-btn').style.display='';
-  window._qHTML=html;window._qLabel=lbl;window._qCat=cat||'All';
+    const waybill=sales.reduce((a,s)=>a+(s.waybill||0),0);
+    let unitsIssued=0;
+    (DB.issuances||[]).forEach(iss=>{if(!inRange(iss.time))return;(iss.items||[]).forEach(it=>{if(it.prodId===p.id||it.prodName===p.name)unitsIssued+=(it.qty||0);});});
+    const spent=unitsSold*(p.price||0);
+    const profit=revenue-spent;
+    const margin=revenue>0?(profit/revenue*100):0;
+    return{name:p.name,category:p.category,stock:totalQty(p),unitsSold,unitsIssued,spent,revenue,waybill,profit,margin};
+  }).sort((a,b)=>b.revenue-a.revenue);
+  lastQueryRows=rows;
+  lastQueryMeta={catFilter,periodLabel:document.getElementById('q-period')?.selectedOptions[0]?.textContent||'',from,to};
+  const el=document.getElementById('query-results');
+  if(!el)return;
+  if(!rows.length){el.innerHTML='<div class="empty">no products match this query</div>';return;}
+  const totRev=rows.reduce((a,r)=>a+r.revenue,0);const totSpent=rows.reduce((a,r)=>a+r.spent,0);const totProfit=rows.reduce((a,r)=>a+r.profit,0);const totUnits=rows.reduce((a,r)=>a+r.unitsSold,0);
+  el.innerHTML='<div style="overflow-x:auto"><table class="tbl"><thead><tr>'
+    +'<th>Product</th><th>Category</th><th>In Stock</th><th>Units Sold</th><th>Units Issued</th><th>Amount Spent</th><th>Revenue</th><th>Profit</th><th>Margin</th>'
+    +'</tr></thead><tbody>'
+    +rows.map(r=>'<tr><td>'+r.name+'</td><td><span class="badge badge-gray">'+r.category+'</span></td><td>'+r.stock+'</td><td>'+r.unitsSold+'</td><td>'+r.unitsIssued+'</td><td>'+fmtP(r.spent)+'</td><td>'+fmtP(r.revenue)+'</td><td style="color:'+(r.profit>=0?'var(--accent)':'var(--red)')+'">'+fmtP(r.profit)+'</td><td>'+r.margin.toFixed(1)+'%</td></tr>').join('')
+    +'</tbody><tfoot><tr style="font-weight:700;border-top:2px solid var(--border2)"><td colspan="3">Totals</td><td>'+totUnits+'</td><td>—</td><td>'+fmtP(totSpent)+'</td><td>'+fmtP(totRev)+'</td><td style="color:'+(totProfit>=0?'var(--accent)':'var(--red)')+'">'+fmtP(totProfit)+'</td><td>'+(totRev>0?(totProfit/totRev*100).toFixed(1):'0.0')+'%</td></tr></tfoot>'
+    +'</table></div>';
 };
 window.printQuery=function(){
-  if(!window._qHTML){alert('Run a query first.');return;}
-  const w=window.open('','_blank','width=1000,height=700');
-  if(!w){alert('Allow popups.');return;}
-  w.document.write('<!DOCTYPE html><html><head><title>Query Report</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:11px;padding:16px;color:#111}h2{font-size:14px;margin-bottom:4px}p{color:#555;font-size:10px;margin-bottom:10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:5px 7px;text-align:left}th{background:#f0f0f0}@page{size:A4 landscape;margin:10mm}</style></head><body><h2>'+(DB.orgName||'Organisation')+' \u2014 Product Query</h2><p>Period: '+window._qLabel+' | Category: '+window._qCat+'</p>'+window._qHTML+'</body></html>');
+  if(!lastQueryRows.length){alert('Run a query first.');return;}
+  const{catFilter,periodLabel,from,to}=lastQueryMeta;
+  const totRev=lastQueryRows.reduce((a,r)=>a+r.revenue,0);const totSpent=lastQueryRows.reduce((a,r)=>a+r.spent,0);const totProfit=lastQueryRows.reduce((a,r)=>a+r.profit,0);const totUnits=lastQueryRows.reduce((a,r)=>a+r.unitsSold,0);
+  const logo=DB.orgLogo?'<img src="'+DB.orgLogo+'" style="height:70px;object-fit:contain;margin-bottom:8px"><br>':'';
+  const rangeTxt=from&&to?(from.toLocaleDateString()+' — '+to.toLocaleDateString()):'All Time';
+  const rows=lastQueryRows.map(r=>'<tr><td style="padding:6px 8px;border:1px solid #ccc">'+r.name+'</td><td style="padding:6px 8px;border:1px solid #ccc">'+r.category+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:center">'+r.stock+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:center">'+r.unitsSold+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:center">'+r.unitsIssued+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(r.spent)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(r.revenue)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(r.profit)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+r.margin.toFixed(1)+'%</td></tr>').join('');
+  const html='<div style="font-family:Arial,sans-serif;font-size:12px;color:#111;width:100%;padding:20px">'
+    +'<div style="text-align:center;border-bottom:2px solid #000;padding-bottom:12px;margin-bottom:16px">'+logo+'<div style="font-size:18px;font-weight:700;letter-spacing:2px">'+(DB.orgName||'Organisation')+'</div><div style="font-size:10px;letter-spacing:3px;color:#555;margin-top:6px">PRODUCT QUERY REPORT</div></div>'
+    +'<div style="margin-bottom:12px;font-size:11px;color:#333"><b>Category:</b> '+(catFilter||'All Categories')+' &nbsp;|&nbsp; <b>Period:</b> '+(periodLabel||'')+' ('+rangeTxt+') &nbsp;|&nbsp; <b>Generated:</b> '+new Date().toLocaleString()+'</div>'
+    +'<table style="width:100%;border-collapse:collapse;margin-bottom:12px"><thead><tr style="background:#f0f0f0">'
+    +'<th style="padding:6px 8px;border:1px solid #ccc;text-align:left">Product</th><th style="padding:6px 8px;border:1px solid #ccc;text-align:left">Category</th><th style="padding:6px 8px;border:1px solid #ccc">In Stock</th><th style="padding:6px 8px;border:1px solid #ccc">Units Sold</th><th style="padding:6px 8px;border:1px solid #ccc">Units Issued</th><th style="padding:6px 8px;border:1px solid #ccc;text-align:right">Amount Spent</th><th style="padding:6px 8px;border:1px solid #ccc;text-align:right">Revenue</th><th style="padding:6px 8px;border:1px solid #ccc;text-align:right">Profit</th><th style="padding:6px 8px;border:1px solid #ccc;text-align:right">Margin</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody><tfoot><tr style="font-weight:700;background:#f9f9f9"><td colspan="3" style="padding:6px 8px;border:1px solid #ccc">Totals</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:center">'+totUnits+'</td><td style="padding:6px 8px;border:1px solid #ccc"></td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(totSpent)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(totRev)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(totProfit)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+(totRev>0?(totProfit/totRev*100).toFixed(1):'0.0')+'%</td></tr></tfoot></table>'
+    +'<div style="margin-top:14px;font-size:10px;color:#888;text-align:center">Generated by NeoOps — '+(DB.orgName||'Organisation')+'</div>'
+    +'</div>';
+  const w=window.open('','_blank','width=900,height=1000');
+  if(!w){alert('Please allow popups.');return;}
+  w.document.write('<!DOCTYPE html><html><head><title>Product Query — '+(DB.orgName||'NeoOps')+'</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff}table{border-collapse:collapse;width:100%}@media print{@page{size:A4 landscape;margin:10mm}}</style></head><body>'+html+'</body></html>');
   w.document.close();setTimeout(()=>{w.focus();w.print();},400);
 };
+
+// ─── SETTINGS ────────────────────────────────────────────────────
+// ─── ORGANISATION PAGE ───────────────────────────────────────────
+function renderOrganisation(){
+  const el=document.getElementById('org-address');
+  if(el)el.value=DB.orgAddress||'';
+  const bl=document.getElementById('backup-lbl');
+  if(bl)bl.textContent='Last backup: '+(localStorage.getItem('neoops_last_backup')||'never');
+}
+window.saveOrgAddress=function(){
+  const v=document.getElementById('org-address')?.value||'';
+  DB.orgAddress=v;addLog('Address updated','cyan');saveDB();
+};
+function renderSettings(){
+  // populate address
+  // address and backup moved to Organisation page
+  document.getElementById('cat-list').innerHTML=(DB.categories||[]).length?(DB.categories||[]).map(c=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:3px;margin-bottom:6px"><span>'+c+'</span><button class="btn btn-sm btn-red" onclick="removeCat(\''+c+'\')">Remove</button></div>').join(''):'<div class="empty">no categories</div>';
+  document.getElementById('dept-list').innerHTML=(DB.departments||[]).length?(DB.departments||[]).map(d=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:3px;margin-bottom:6px"><span>'+d+'</span><button class="btn btn-sm btn-red" onclick="removeDept(\''+d+'\')">Remove</button></div>').join(''):'<div class="empty">no departments</div>';
+  renderOrganisation();
+}
 window.addCat=function(){if(!DB.categories)DB.categories=[];const v=document.getElementById('new-cat').value.trim();if(!v||DB.categories.includes(v))return;DB.categories.push(v);addLog('Category added: '+v,'cyan');saveDB();document.getElementById('new-cat').value='';renderSettings();};
 window.removeCat=function(c){DB.categories=(DB.categories||[]).filter(x=>x!==c);addLog('Category removed: '+c,'red');saveDB();renderSettings();};
 window.addDept=function(){if(!DB.departments)DB.departments=[];const v=document.getElementById('new-dept').value.trim();if(!v||DB.departments.includes(v))return;DB.departments.push(v);addLog('Department added: '+v,'cyan');saveDB();document.getElementById('new-dept').value='';renderSettings();populateDeptSel();};
@@ -1452,7 +1468,7 @@ async function manualBackup(){
 window.manualBackup=manualBackup;
 function checkAutoBackup(){const last=localStorage.getItem('neoops_last_backup');const today=new Date().toISOString().slice(0,10);if(last!==today)manualBackup().catch(()=>{});}
 window.exportBackup=function(){const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='neoops-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);addLog('Manual backup exported','cyan');saveDB();};
-window.importBackup=function(){const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const imp=JSON.parse(ev.target.result);if(!imp.products)throw new Error('Invalid backup');if(!confirm('Replace ALL data with this backup?'))return;DB=Object.assign({products:[],categories:[],departments:[],passwords:{},users:[],logs:[],sales:[],pastInvoices:[],issuances:[],clients:[],orgName:'Organisation',orgMotto:'',orgLogo:null,invCounter:0},imp);saveDB();renderCurrentPage();alert('Restore complete.');}catch(err){alert('Invalid backup: '+err.message);}};r.readAsText(f);};input.click();};
+window.importBackup=function(){const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const imp=JSON.parse(ev.target.result);if(!imp.products)throw new Error('Invalid backup');if(!confirm('Replace ALL data with this backup?'))return;DB=Object.assign({products:[],categories:[],departments:[],passwords:{},users:[],logs:[],sales:[],pastInvoices:[],issuances:[],clients:[],orgName:'Organisation',orgMotto:'',orgLogo:null,invCounter:0},imp);saveDB();syncSidebarLogo();renderCurrentPage();alert('Restore complete.');}catch(err){alert('Invalid backup: '+err.message);}};r.readAsText(f);};input.click();};
 
 // ─── SEED ────────────────────────────────────────────────────────
 function seedData(){
@@ -1464,7 +1480,49 @@ function seedData(){
 }
 
 // ─── BOOT ────────────────────────────────────────────────────────
-initApp().then(()=>{seedData();checkAutoBackup();});
+initApp().then(()=>{window._appReady=true;seedData();checkAutoBackup();});
+</script>
+
+<!-- Safety net: if Firebase module is slow, still let user in from localStorage -->
+<script>
+(function(){
+  // Run immediately, before module script finishes
+  try{
+    var local=localStorage.getItem('neoops_data');
+    if(local){
+      var d=JSON.parse(local);
+      var o=document.getElementById('w-org');
+      var m=document.getElementById('w-motto');
+      var s=document.getElementById('w-status');
+      if(o&&d.orgName)o.textContent=d.orgName;
+      if(m&&d.orgMotto)m.textContent=d.orgMotto;
+      if(s)s.textContent='';
+      if(d.orgLogo){
+        var img=document.getElementById('logo-preview');
+        var hint=document.getElementById('logo-hint');
+        if(img){img.src=d.orgLogo;img.style.display='block';}
+        if(hint)hint.style.display='none';
+      }
+    }
+  }catch(e){}
+  // If module hasn't called enterApp within 5s, wire up Continue to work from localStorage only
+  setTimeout(function(){
+    var btn=document.querySelector('.w-btn');
+    if(btn&&!window._appReady){
+      btn.onclick=function(){
+        try{
+          var local=localStorage.getItem('neoops_data');
+          if(local&&window.DB)Object.assign(window.DB,JSON.parse(local));
+        }catch(e){}
+        var w=document.getElementById('welcome');
+        var app=document.getElementById('app');
+        if(w)w.classList.add('gone');
+        if(app)app.classList.remove('gone');
+        if(window.drillTo)window.drillTo('dashboard');
+      };
+    }
+  },500);
+})();
 </script>
 </body>
 </html>
