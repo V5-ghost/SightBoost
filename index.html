@@ -786,6 +786,7 @@ const fmtP=n=>(n&&n>0)?'₦'+Number(n).toLocaleString():'nil';
 const fmtT=iso=>{if(!iso)return'—';const d=new Date(iso);return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});};
 const fmtBatch=exp=>{const d=exp?new Date(exp+'T00:00:00'):new Date();return'Batch'+String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getFullYear()).slice(2);};
 const roundTo10=n=>Math.round(n/10)*10;
+const roundTo100=n=>Math.round(n/100)*100;
 function syncSidebarLogo(){
   const wrap=document.getElementById('sidebar-logo-img');const img=document.getElementById('sidebar-logo');
   if(!wrap||!img)return;
@@ -807,7 +808,7 @@ function addLog(msg,type='info'){
 async function drillTo(section){
   // block dashboard users from admin
   if(section==='admin'&&currentUser&&currentUser.role==='dashboard'){
-    alert('Access denied.\n\n"'+currentUser.name+'" is a Dashboard user and is not allowed to access Admin.');
+    alert('Access Denied\n\n"'+currentUser.name+'" is a Dashboard user and is not allowed to enter the Admin section.');
     return;
   }
   if(section==='dashboard'&&DB.passwords&&DB.passwords.dashboard&&!dashUnlocked){
@@ -900,6 +901,7 @@ function showUserLogin(){
     +'</div>'
   ).join('');
 }
+window.showUserLogin=showUserLogin;
 window.selectLoginUser=function(uid){
   const u=(DB.users||[]).find(x=>x.id===uid);if(!u)return;
   selectedLoginUser=u;
@@ -1034,10 +1036,10 @@ window.openAddProd=openAddProd;
 window.openEditProd=function(id){const p=(DB.products||[]).find(x=>x.id===id);document.getElementById('edit-id').value=id;document.getElementById('prod-ov-title').textContent='EDIT PRODUCT';document.getElementById('f-name').value=p.name;document.getElementById('f-cost').value=p.price||'';document.getElementById('f-retail').value=p.retailPrice||'';document.getElementById('f-reorder').value=p.reorder||'';document.getElementById('markup-tog').className='toggle';document.getElementById('f-markup').style.display='none';document.getElementById('markup-prev').textContent='';document.getElementById('f-qty').value='';popCatSel(p.category);closeOv('detail-ov');openOv('prod-ov');};
 function popCatSel(sel){document.getElementById('f-cat').innerHTML=(DB.categories||[]).map(c=>'<option'+(c===sel?' selected':'')+'>'+c+'</option>').join('');}
 window.toggleMarkup=function(){const t=document.getElementById('markup-tog');const on=t.classList.toggle('on');document.getElementById('f-markup').style.display=on?'':'none';if(!on){document.getElementById('markup-prev').textContent='';document.getElementById('f-retail').value='';}};
-window.previewMarkup=function(){const cost=parseFloat(document.getElementById('f-cost').value)||0;const pct=parseFloat(document.getElementById('f-markup').value)||0;if(!cost||!pct){document.getElementById('markup-prev').textContent='';return;}const r=roundTo10(cost*(1+pct/100));document.getElementById('f-retail').value=r;document.getElementById('markup-prev').textContent='= ₦'+r.toLocaleString();};
+window.previewMarkup=function(){const cost=parseFloat(document.getElementById('f-cost').value)||0;const pct=parseFloat(document.getElementById('f-markup').value)||0;if(!cost||!pct){document.getElementById('markup-prev').textContent='';return;}const r=roundTo100(cost*(1+pct/100));document.getElementById('f-retail').value=r;document.getElementById('markup-prev').textContent='= ₦'+r.toLocaleString();};
 window.saveProd=function(){
   const id=document.getElementById('edit-id').value;const name=document.getElementById('f-name').value.trim();if(!name){alert('Enter a product name.');return;}
-  const cat=document.getElementById('f-cat').value;const price=parseFloat(document.getElementById('f-cost').value)||0;const retailPrice=parseFloat(document.getElementById('f-retail').value)||0;const reorder=parseInt(document.getElementById('f-reorder').value)||0;const exp=document.getElementById('f-exp').value;const qty=parseInt(document.getElementById('f-qty').value)||0;
+  const cat=document.getElementById('f-cat').value;const price=parseFloat(document.getElementById('f-cost').value)||0;const retailPrice=roundTo100(parseFloat(document.getElementById('f-retail').value)||0);const reorder=parseInt(document.getElementById('f-reorder').value)||0;const exp=document.getElementById('f-exp').value;const qty=parseInt(document.getElementById('f-qty').value)||0;
   if(id){const p=(DB.products||[]).find(x=>x.id===id);Object.assign(p,{name,category:cat,price,retailPrice,reorder});addLog('Product updated: '+name,'cyan');}
   else{if(!DB.products)DB.products=[];DB.products.push({id:uid(),name,category:cat,price,retailPrice,reorder,prodDate:document.getElementById('f-prod').value,expiry:exp,batches:qty>0?[{id:uid(),name:fmtBatch(exp),qty,expiry:exp||''}]:[]});addLog('Product created: '+name,'green');}
   saveDB();closeOv('prod-ov');renderCurrentPage();
@@ -1217,7 +1219,7 @@ window.printSelected=function(client){const checked=[...document.querySelectorAl
 // ─── INVOICE ────────────────────────────────────────────────────
 function fmtInvNo(n){return'INV#'+String(n).padStart(3,'0');}
 function nextInvNo(){DB.invCounter=(DB.invCounter||0)+1;return DB.invCounter;}
-function amountToWords(n){const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];const b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];if(n===0)return'Zero Naira Only';const w=x=>{if(x<20)return a[x];if(x<100)return b[Math.floor(x/10)]+(x%10?' '+a[x%10]:'');if(x<1000)return a[Math.floor(x/100)]+' Hundred'+(x%100?' '+w(x%100):'');if(x<1e6)return w(Math.floor(x/1000))+' Thousand'+(x%1000?' '+w(x%1000):'');return w(Math.floor(x/1e6))+' Million'+(x%1e6?' '+w(x%1e6):'');};return w(Math.floor(n))+' Naira Only';}
+function amountToWords(n){const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];const b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];if(n===0)return'Zero Naira Only';const w=x=>{if(x<20)return a[x];if(x<100)return b[Math.floor(x/10)]+(x%10?' '+a[x%10]:'');if(x<1000)return a[Math.floor(x/100)]+' Hundred'+(x%100?' and '+w(x%100):'');if(x<1e6)return w(Math.floor(x/1000))+' Thousand'+(x%1000?' '+w(x%1000):'');return w(Math.floor(x/1e6))+' Million'+(x%1e6?' '+w(x%1e6):'');};return w(Math.floor(n))+' Naira Only';}
 function buildInvoiceHTML(sales,invNo){
   if(!sales||!sales.length)return'';if(!invNo)invNo='INV#---';
   const client=sales[0].client;const phone=sales[0].phone;
@@ -1575,23 +1577,31 @@ initApp().then(()=>{window._appReady=true;seedData();checkAutoBackup();});
       }
     }
   }catch(e){}
-  // If module hasn't called enterApp within 5s, wire up Continue to work from localStorage only
+  // Only intervene if the app module genuinely failed to load (e.g. blocked/offline).
+  // window.enterApp is defined the moment the module script parses, well before any
+  // Firebase call resolves — so checking for it (instead of a fixed short timer)
+  // avoids stealing the Continue button away from the real, login-aware handler.
   setTimeout(function(){
+    if(typeof window.enterApp==='function')return;
     var btn=document.querySelector('.w-btn');
-    if(btn&&!window._appReady){
+    if(btn){
       btn.onclick=function(){
         try{
           var local=localStorage.getItem('neoops_data');
           if(local&&window.DB)Object.assign(window.DB,JSON.parse(local));
         }catch(e){}
         var w=document.getElementById('welcome');
-        var app=document.getElementById('app');
         if(w)w.classList.add('gone');
-        if(app)app.classList.remove('gone');
-        if(window.drillTo)window.drillTo('dashboard');
+        if(window.DB&&window.DB.users&&window.DB.users.length>0&&typeof window.showUserLogin==='function'){
+          window.showUserLogin();
+        }else{
+          var app=document.getElementById('app');
+          if(app)app.classList.remove('gone');
+          if(window.drillTo)window.drillTo('dashboard');
+        }
       };
     }
-  },500);
+  },4000);
 })();
 </script>
 </body>
