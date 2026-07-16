@@ -211,7 +211,7 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 
 <!-- WELCOME -->
 <div id="welcome">
-  <div class="w-logo">Sihgt<span>Boost</span></div>
+  <div class="w-logo">NEO<span>OPS</span></div>
   <div class="w-upload" id="logo-area">
     <img id="logo-preview" style="display:none" alt="logo">
     <div class="w-hint" id="logo-hint">⊕ upload logo</div>
@@ -241,9 +241,9 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 <div class="app gone" id="app">
   <div class="sidebar">
     <div class="s-logo">
-      <div id="sidebar-logo-img" style="display:none;margin-bottom:4px"><img id="sidebar-logo" style="height:32px;object-fit:contain;max-width:140px"></div>
-      <div class="s-logo-name" id="sidebar-logo-text">Sight<span style="color:var(--text3)">Boost</span></div>
-      <div class="s-logo-sub">central store</div>
+      <div id="sidebar-logo-img" style="display:none;margin-bottom:4px"><img id="sidebar-logo" style="height:52px;object-fit:contain;max-width:170px"></div>
+      <div class="s-logo-name" id="sidebar-logo-text">SIGHT<span style="color:var(--text3)"> BOOST</span></div>
+      <div class="s-logo-sub">Central Store</div>
     </div>
     <!-- ROOT -->
     <div class="nav-root" id="nav-root">
@@ -411,6 +411,10 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
               <button class="btn btn-solid" onclick="runQuery()">Run Query</button>
               <button class="btn" onclick="printQuery()">🖨 Print</button>
             </div>
+          </div>
+          <div class="fr" style="margin-bottom:10px">
+            <label class="fl">Columns to Include</label>
+            <div id="q-col-picker" style="display:flex;flex-wrap:wrap;gap:6px"></div>
           </div>
           <div id="query-results"></div>
         </div>
@@ -1163,14 +1167,18 @@ function renderIssReceipts(){
   const el=document.getElementById('iss-receipts');if(!el)return;
   const recent=(DB.issuances||[]).slice(0,5);
   if(!recent.length){el.innerHTML='<div class="empty">no issuances yet</div>';return;}
-  el.innerHTML=recent.map(r=>'<div class="iss-receipt"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div style="font-size:12px;font-weight:500">To: '+r.to+'</div><div style="font-size:10px;color:var(--text2)">'+(r.issuedBy?'By: '+r.issuedBy+' · ':'')+fmtT(r.time)+'</div></div><button class="btn btn-sm" onclick="printIssReceipt(\''+r.id+'\')">Print</button></div>'+(r.items||[]).map(i=>'<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)"><span>'+i.prodName+'</span><span style="color:var(--accent);font-weight:700">'+i.qty+' units</span></div>').join('')+'</div>').join('');
+  el.innerHTML=recent.map(r=>{
+    const u=(DB.users||[]).find(x=>x.username===r.issuedBy);
+    const byName=u&&u.name?u.name:(r.issuedBy||'');
+    return'<div class="iss-receipt"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div style="font-size:12px;font-weight:500">To: '+r.to+'</div><div style="font-size:10px;color:var(--text2)">'+(byName?'By: '+byName+' · ':'')+fmtT(r.time)+'</div></div><button class="btn btn-sm" onclick="printIssReceipt(\''+r.id+'\')">Print</button></div>'+(r.items||[]).map(i=>'<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)"><span>'+i.prodName+'</span><span style="color:var(--accent);font-weight:700">'+i.qty+' units</span></div>').join('')+'</div>';
+  }).join('');
 }
 window.printIssReceipt=function(id){
   const r=(DB.issuances||[]).find(x=>x.id===id);if(!r)return;
   const secCode='ISS-'+id.slice(0,8).toUpperCase();
   const issUser=(DB.users||[]).find(u=>u.username===r.issuedBy)||null;
   const issSigImg=issUser&&issUser.sig?'<img src="'+issUser.sig+'" style="height:40px;object-fit:contain;display:block;margin-bottom:4px">':'';
-  const issSigName=r.issuedBy||'';
+  const issSigName=issUser&&issUser.name?issUser.name:(r.issuedBy||'');
   const micro=((r.orgName||DB.orgName||'NEOOPS').toUpperCase()+' \u00b7 '+secCode+' \u00b7 ').repeat(25);
   const microBar='<div style="font-size:5px;color:rgba(0,0,0,0.15);letter-spacing:0.5px;word-break:break-all;line-height:1.3;padding:4px 8px;background:#f5f5f5">'+micro+'</div>';
   const rows=(r.items||[]).map(i=>'<tr><td style="padding:6px 8px;border:1px solid #ccc">'+i.prodName+'</td><td style="padding:6px 8px;border:1px solid #ccc;font-size:10px">'+i.batchName+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:center;font-weight:700">'+i.qty+'</td></tr>').join('');
@@ -1178,7 +1186,7 @@ window.printIssReceipt=function(id){
     +microBar+'<div style="padding:20px 24px">'
     +'<div style="text-align:center;border-bottom:2px solid #000;padding-bottom:12px;margin-bottom:16px">'+(DB.orgLogo?'<img src="'+DB.orgLogo+'" style="height:50px;object-fit:contain;margin-bottom:6px"><br>':'')+'<div style="font-size:18px;font-weight:700;letter-spacing:2px">'+(r.orgName||DB.orgName||'Organisation')+'</div>'+(DB.orgAddress?'<div style="font-size:10px;color:#555;margin-top:4px;white-space:pre-line">'+DB.orgAddress+'</div>':'')+'<div style="font-size:10px;letter-spacing:3px;color:#555;margin-top:4px">STOCK ISSUANCE RECEIPT</div></div>'
     +'<div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><b>Receipt No:</b> '+secCode+'</div><div><b>Date:</b> '+new Date(r.time).toLocaleDateString()+'</div></div>'
-    +'<div style="margin-bottom:12px"><div><b>Issued To:</b> '+r.to+'</div>'+(r.issuedBy?'<div><b>Issued By:</b> '+r.issuedBy+'</div>':'')+'</div>'
+    +'<div style="margin-bottom:12px"><div><b>Issued To:</b> '+r.to+'</div>'+(issSigName?'<div><b>Issued By:</b> '+issSigName+'</div>':'')+'</div>'
     +'<table style="width:100%;border-collapse:collapse;margin-bottom:12px"><thead><tr style="background:#f0f0f0"><th style="padding:6px 8px;text-align:left;border:1px solid #ccc">Product</th><th style="padding:6px 8px;text-align:left;border:1px solid #ccc">Batch</th><th style="padding:6px 8px;text-align:center;border:1px solid #ccc">Qty</th></tr></thead><tbody>'+rows+'</tbody></table>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;padding-top:14px;border-top:1px solid #ccc"><div style="text-align:center">'+issSigImg+'<div style="border-top:1px solid #000;margin-top:'+(issSigImg?'4':'28')+'px;padding-top:4px;font-size:10px">Authorised By'+(issSigName?' \u2014 '+issSigName:'')+'</div></div><div style="text-align:center"><div style="border-top:1px solid #000;margin-top:28px;padding-top:4px;font-size:10px">Received By</div></div></div>'
     +'<div style="font-size:9px;color:#aaa;text-align:center;margin-top:10px">Verification: '+secCode+' \u2014 '+(r.orgName||DB.orgName||'Organisation')+'</div>'
@@ -1262,6 +1270,37 @@ function renderLogs(){
 }
 
 // ─── ADMIN › PRODUCTS (Add Product + Query) ──────────────────────
+const QUERY_COLUMNS=[
+  {key:'category',label:'Category',fmt:v=>v||'—'},
+  {key:'stock',label:'In Stock',fmt:v=>v},
+  {key:'reorder',label:'Reorder Level',fmt:v=>v},
+  {key:'costPrice',label:'Cost Price',fmt:v=>fmtP(v)},
+  {key:'retailPrice',label:'Retail Price',fmt:v=>fmtP(v)},
+  {key:'unitsSold',label:'Units Sold',fmt:v=>v},
+  {key:'saleCount',label:'# Sales',fmt:v=>v},
+  {key:'unitsIssued',label:'Units Issued',fmt:v=>v},
+  {key:'spent',label:'Amount Spent',fmt:v=>fmtP(v)},
+  {key:'revenue',label:'Revenue',fmt:v=>fmtP(v)},
+  {key:'waybill',label:'Waybill Collected',fmt:v=>fmtP(v)},
+  {key:'profit',label:'Profit',fmt:v=>fmtP(v)},
+  {key:'margin',label:'Margin %',fmt:v=>v.toFixed(1)+'%'},
+  {key:'lastSale',label:'Last Sale Date',fmt:v=>v?new Date(v).toLocaleDateString():'—'}
+];
+let selectedQueryCols=new Set(QUERY_COLUMNS.map(c=>c.key));
+function renderColPicker(){
+  const el=document.getElementById('q-col-picker');if(!el)return;
+  el.innerHTML=QUERY_COLUMNS.map(c=>'<button type="button" class="sort-btn'+(selectedQueryCols.has(c.key)?' active':'')+'" onclick="toggleQCol(\''+c.key+'\')">'+c.label+'</button>').join('')
+    +'<button type="button" class="sort-btn" onclick="setAllQCols(true)">All</button>'
+    +'<button type="button" class="sort-btn" onclick="setAllQCols(false)">None</button>';
+}
+window.toggleQCol=function(key){
+  if(selectedQueryCols.has(key))selectedQueryCols.delete(key);else selectedQueryCols.add(key);
+  renderColPicker();runQuery();
+};
+window.setAllQCols=function(all){
+  selectedQueryCols=new Set(all?QUERY_COLUMNS.map(c=>c.key):[]);
+  renderColPicker();runQuery();
+};
 function renderAdminProducts(){
   const sel=document.getElementById('q-cat');
   if(sel){
@@ -1269,6 +1308,7 @@ function renderAdminProducts(){
     sel.innerHTML='<option value="">All Categories</option>'+(DB.categories||[]).map(c=>'<option>'+c+'</option>').join('');
     sel.value=cur||'';
   }
+  renderColPicker();
   handleQPeriod();
   runQuery();
 }
@@ -1297,7 +1337,7 @@ function getQueryRange(){
   return{from,to};
 }
 let lastQueryRows=[];let lastQueryMeta={};
-window.runQuery=function(){
+function computeQueryRows(){
   const catFilter=document.getElementById('q-cat')?.value||'';
   const{from,to}=getQueryRange();
   const inRange=iso=>{if(!iso)return false;const t=new Date(iso);if(from&&t<from)return false;if(to&&t>to)return false;return true;};
@@ -1306,42 +1346,72 @@ window.runQuery=function(){
   const rows=prods.map(p=>{
     const sales=(DB.sales||[]).filter(s=>s.product===p.name&&inRange(s.time));
     const unitsSold=sales.reduce((a,s)=>a+(s.qty||0),0);
+    const saleCount=sales.length;
     const revenue=sales.reduce((a,s)=>a+(s.subtotal||0),0);
     const waybill=sales.reduce((a,s)=>a+(s.waybill||0),0);
+    const lastSale=sales.reduce((a,s)=>(!a||new Date(s.time)>new Date(a))?s.time:a,null);
     let unitsIssued=0;
     (DB.issuances||[]).forEach(iss=>{if(!inRange(iss.time))return;(iss.items||[]).forEach(it=>{if(it.prodId===p.id||it.prodName===p.name)unitsIssued+=(it.qty||0);});});
     const spent=unitsSold*(p.price||0);
     const profit=revenue-spent;
     const margin=revenue>0?(profit/revenue*100):0;
-    return{name:p.name,category:p.category,stock:totalQty(p),unitsSold,unitsIssued,spent,revenue,waybill,profit,margin};
+    return{name:p.name,category:p.category,stock:totalQty(p),reorder:p.reorder||0,costPrice:p.price||0,retailPrice:p.retailPrice||p.price||0,unitsSold,saleCount,unitsIssued,spent,revenue,waybill,profit,margin,lastSale};
   }).sort((a,b)=>b.revenue-a.revenue);
+  return{rows,catFilter,from,to};
+}
+window.runQuery=function(){
+  const{rows,catFilter,from,to}=computeQueryRows();
   lastQueryRows=rows;
   lastQueryMeta={catFilter,periodLabel:document.getElementById('q-period')?.selectedOptions[0]?.textContent||'',from,to};
   const el=document.getElementById('query-results');
   if(!el)return;
   if(!rows.length){el.innerHTML='<div class="empty">no products match this query</div>';return;}
-  const totRev=rows.reduce((a,r)=>a+r.revenue,0);const totSpent=rows.reduce((a,r)=>a+r.spent,0);const totProfit=rows.reduce((a,r)=>a+r.profit,0);const totUnits=rows.reduce((a,r)=>a+r.unitsSold,0);
+  const cols=QUERY_COLUMNS.filter(c=>selectedQueryCols.has(c.key));
+  if(!cols.length){el.innerHTML='<div class="empty">select at least one column above</div>';return;}
+  const numericTotals=['unitsSold','saleCount','unitsIssued','spent','revenue','waybill','profit'];
+  const totals={};numericTotals.forEach(k=>totals[k]=rows.reduce((a,r)=>a+(r[k]||0),0));
+  const totRevenue=totals.revenue||0;
   el.innerHTML='<div style="overflow-x:auto"><table class="tbl"><thead><tr>'
-    +'<th>Product</th><th>Category</th><th>In Stock</th><th>Units Sold</th><th>Units Issued</th><th>Amount Spent</th><th>Revenue</th><th>Profit</th><th>Margin</th>'
+    +'<th>Product</th>'+cols.map(c=>'<th>'+c.label+'</th>').join('')
     +'</tr></thead><tbody>'
-    +rows.map(r=>'<tr><td>'+r.name+'</td><td><span class="badge badge-gray">'+r.category+'</span></td><td>'+r.stock+'</td><td>'+r.unitsSold+'</td><td>'+r.unitsIssued+'</td><td>'+fmtP(r.spent)+'</td><td>'+fmtP(r.revenue)+'</td><td style="color:'+(r.profit>=0?'var(--accent)':'var(--red)')+'">'+fmtP(r.profit)+'</td><td>'+r.margin.toFixed(1)+'%</td></tr>').join('')
-    +'</tbody><tfoot><tr style="font-weight:700;border-top:2px solid var(--border2)"><td colspan="3">Totals</td><td>'+totUnits+'</td><td>—</td><td>'+fmtP(totSpent)+'</td><td>'+fmtP(totRev)+'</td><td style="color:'+(totProfit>=0?'var(--accent)':'var(--red)')+'">'+fmtP(totProfit)+'</td><td>'+(totRev>0?(totProfit/totRev*100).toFixed(1):'0.0')+'%</td></tr></tfoot>'
-    +'</table></div>';
+    +rows.map(r=>'<tr><td>'+r.name+'</td>'+cols.map(c=>{
+      const raw=r[c.key];const disp=c.fmt(raw);
+      const style=(c.key==='profit')?(' style="color:'+(raw>=0?'var(--accent)':'var(--red)')+'"'):'';
+      const inner=(c.key==='category')?'<span class="badge badge-gray">'+disp+'</span>':disp;
+      return'<td'+style+'>'+inner+'</td>';
+    }).join('')+'</tr>').join('')
+    +'</tbody><tfoot><tr style="font-weight:700;border-top:2px solid var(--border2)"><td>Totals</td>'
+    +cols.map(c=>{
+      if(numericTotals.includes(c.key))return'<td>'+c.fmt(totals[c.key])+'</td>';
+      if(c.key==='margin')return'<td>'+(totRevenue>0?((totals.profit/totRevenue)*100).toFixed(1):'0.0')+'%</td>';
+      return'<td>—</td>';
+    }).join('')
+    +'</tr></tfoot></table></div>';
 };
 window.printQuery=function(){
-  if(!lastQueryRows.length){alert('Run a query first.');return;}
   const{catFilter,periodLabel,from,to}=lastQueryMeta;
-  const totRev=lastQueryRows.reduce((a,r)=>a+r.revenue,0);const totSpent=lastQueryRows.reduce((a,r)=>a+r.spent,0);const totProfit=lastQueryRows.reduce((a,r)=>a+r.profit,0);const totUnits=lastQueryRows.reduce((a,r)=>a+r.unitsSold,0);
+  if(!lastQueryRows.length){alert('Run a query first.');return;}
+  const cols=QUERY_COLUMNS.filter(c=>selectedQueryCols.has(c.key));
+  if(!cols.length){alert('Select at least one column to print.');return;}
+  const numericTotals=['unitsSold','saleCount','unitsIssued','spent','revenue','waybill','profit'];
+  const totals={};numericTotals.forEach(k=>totals[k]=lastQueryRows.reduce((a,r)=>a+(r[k]||0),0));
+  const totRevenue=totals.revenue||0;
   const logo=DB.orgLogo?'<img src="'+DB.orgLogo+'" style="height:70px;object-fit:contain;margin-bottom:8px"><br>':'';
   const rangeTxt=from&&to?(from.toLocaleDateString()+' — '+to.toLocaleDateString()):'All Time';
-  const rows=lastQueryRows.map(r=>'<tr><td style="padding:6px 8px;border:1px solid #ccc">'+r.name+'</td><td style="padding:6px 8px;border:1px solid #ccc">'+r.category+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:center">'+r.stock+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:center">'+r.unitsSold+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:center">'+r.unitsIssued+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(r.spent)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(r.revenue)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(r.profit)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+r.margin.toFixed(1)+'%</td></tr>').join('');
+  const th=c=>'<th style="padding:6px 8px;border:1px solid #ccc;text-align:'+(numericTotals.includes(c.key)||c.key==='margin'?'right':'left')+'">'+c.label+'</th>';
+  const td=(r,c)=>{const raw=r[c.key];const disp=c.fmt(raw);const align=(numericTotals.includes(c.key)||c.key==='margin')?'right':'left';return'<td style="padding:6px 8px;border:1px solid #ccc;text-align:'+align+'">'+disp+'</td>';};
+  const rows=lastQueryRows.map(r=>'<tr><td style="padding:6px 8px;border:1px solid #ccc">'+r.name+'</td>'+cols.map(c=>td(r,c)).join('')+'</tr>').join('');
+  const totalRow='<tr style="font-weight:700;background:#f9f9f9"><td style="padding:6px 8px;border:1px solid #ccc">Totals</td>'
+    +cols.map(c=>{
+      if(numericTotals.includes(c.key))return'<td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+c.fmt(totals[c.key])+'</td>';
+      if(c.key==='margin')return'<td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+(totRevenue>0?((totals.profit/totRevenue)*100).toFixed(1):'0.0')+'%</td>';
+      return'<td style="padding:6px 8px;border:1px solid #ccc"></td>';
+    }).join('')+'</tr>';
   const html='<div style="font-family:Arial,sans-serif;font-size:12px;color:#111;width:100%;padding:20px">'
     +'<div style="text-align:center;border-bottom:2px solid #000;padding-bottom:12px;margin-bottom:16px">'+logo+'<div style="font-size:18px;font-weight:700;letter-spacing:2px">'+(DB.orgName||'Organisation')+'</div><div style="font-size:10px;letter-spacing:3px;color:#555;margin-top:6px">PRODUCT QUERY REPORT</div></div>'
     +'<div style="margin-bottom:12px;font-size:11px;color:#333"><b>Category:</b> '+(catFilter||'All Categories')+' &nbsp;|&nbsp; <b>Period:</b> '+(periodLabel||'')+' ('+rangeTxt+') &nbsp;|&nbsp; <b>Generated:</b> '+new Date().toLocaleString()+'</div>'
-    +'<table style="width:100%;border-collapse:collapse;margin-bottom:12px"><thead><tr style="background:#f0f0f0">'
-    +'<th style="padding:6px 8px;border:1px solid #ccc;text-align:left">Product</th><th style="padding:6px 8px;border:1px solid #ccc;text-align:left">Category</th><th style="padding:6px 8px;border:1px solid #ccc">In Stock</th><th style="padding:6px 8px;border:1px solid #ccc">Units Sold</th><th style="padding:6px 8px;border:1px solid #ccc">Units Issued</th><th style="padding:6px 8px;border:1px solid #ccc;text-align:right">Amount Spent</th><th style="padding:6px 8px;border:1px solid #ccc;text-align:right">Revenue</th><th style="padding:6px 8px;border:1px solid #ccc;text-align:right">Profit</th><th style="padding:6px 8px;border:1px solid #ccc;text-align:right">Margin</th>'
-    +'</tr></thead><tbody>'+rows+'</tbody><tfoot><tr style="font-weight:700;background:#f9f9f9"><td colspan="3" style="padding:6px 8px;border:1px solid #ccc">Totals</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:center">'+totUnits+'</td><td style="padding:6px 8px;border:1px solid #ccc"></td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(totSpent)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(totRev)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+fmtP(totProfit)+'</td><td style="padding:6px 8px;border:1px solid #ccc;text-align:right">'+(totRev>0?(totProfit/totRev*100).toFixed(1):'0.0')+'%</td></tr></tfoot></table>'
-    +'<div style="margin-top:14px;font-size:10px;color:#888;text-align:center">Generated by NeoOps — '+(DB.orgName||'Organisation')+'</div>'
+    +'<table style="width:100%;border-collapse:collapse;margin-bottom:12px"><thead><tr style="background:#f0f0f0"><th style="padding:6px 8px;border:1px solid #ccc;text-align:left">Product</th>'+cols.map(th).join('')+'</tr></thead><tbody>'+rows+'</tbody><tfoot>'+totalRow+'</tfoot></table>'
+    +'<div style="margin-top:14px;font-size:10px;color:#888;text-align:center">Generated by '+(DB.orgName||'NeoOps')+'</div>'
     +'</div>';
   const w=window.open('','_blank','width=900,height=1000');
   if(!w){alert('Please allow popups.');return;}
