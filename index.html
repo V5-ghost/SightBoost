@@ -205,6 +205,43 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 /* ── ISSUANCE RECEIPT ── */
 .iss-item-row{display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;margin-bottom:6px}
 .iss-receipt{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:10px}
+
+/* ── POLISH: depth, motion, focus ── */
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+*{scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+
+.card{box-shadow:0 1px 2px rgba(0,0,0,0.12),0 0 0 1px transparent;transition:background-color 0.2s,border-color 0.2s,color 0.15s,box-shadow 0.2s,transform 0.15s}
+.stat{box-shadow:0 1px 2px rgba(0,0,0,0.12);transition:background-color 0.2s,border-color 0.2s,color 0.15s,box-shadow 0.2s,transform 0.15s}
+.stat.click:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.18);border-color:var(--border2)}
+.prod-card{transition:background-color 0.2s,border-color 0.2s,color 0.15s,box-shadow 0.2s,transform 0.15s}
+.prod-card:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,0.2)}
+
+.btn{transition:background-color 0.15s,border-color 0.15s,color 0.15s,box-shadow 0.15s,transform 0.1s}
+.btn:active{transform:translateY(1px)}
+.btn-solid{box-shadow:0 2px 8px var(--accent3)}
+.btn-solid:hover{box-shadow:0 4px 14px var(--accent3)}
+.w-btn{box-shadow:0 4px 18px var(--accent3);transition:background-color 0.15s,box-shadow 0.15s,transform 0.1s}
+.w-btn:hover{box-shadow:0 6px 22px var(--accent3);transform:translateY(-1px)}
+.w-btn:active{transform:translateY(0)}
+
+.sidebar{box-shadow:1px 0 0 0 transparent}
+.topbar{box-shadow:0 2px 6px rgba(0,0,0,0.08)}
+.nav-sub{position:relative}
+.nav-sub.active::after{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+
+.overlay{backdrop-filter:blur(2px)}
+.modal,.modal-sm{box-shadow:0 20px 50px rgba(0,0,0,0.35)}
+.overlay.open .modal,.overlay.open .modal-sm{animation:modalIn 0.16s cubic-bezier(.2,.9,.3,1)}
+@keyframes modalIn{from{opacity:0;transform:translateY(6px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.fi:focus{box-shadow:0 0 0 3px var(--accent3)}
+.btn:focus-visible,.fi:focus-visible,.cat-tab:focus-visible,.sort-btn:focus-visible,.nav-item:focus-visible,.nav-sub:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+.badge{letter-spacing:0.5px}
+.tbl tr{transition:background-color 0.12s}
 </style>
 </head>
 <body>
@@ -289,6 +326,9 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
       </div>
       <div class="nav-sub" id="sub-users" onclick="showPage('users',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a7 7 0 0114 0v2"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/></svg>Users
+      </div>
+      <div class="nav-sub" id="sub-movement" onclick="showPage('movement',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16l-4 4-4-4M17 20V4M3 8l4-4 4 4M7 4v16"/></svg>Stock Movement
       </div>
       <div class="nav-sub" id="sub-logs" onclick="showPage('logs',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Activity Log
@@ -476,6 +516,23 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
         <div id="inv-list"></div>
       </div>
 
+      <!-- STOCK MOVEMENT -->
+      <div class="page" id="page-movement">
+        <div class="sec-hdr">
+          <div class="sec-title">Stock Movement</div>
+          <span id="mv-count" style="font-size:11px;color:var(--text3)"></span>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:14px" id="mv-tabs">
+          <button class="sort-btn active" onclick="setMvFilter('all',this)">All</button>
+          <button class="sort-btn" onclick="setMvFilter('in',this)">Stock In</button>
+          <button class="sort-btn" onclick="setMvFilter('out',this)">Stock Out</button>
+          <button class="sort-btn" onclick="setMvFilter('sale',this)">Sales</button>
+          <button class="sort-btn" onclick="setMvFilter('issuance',this)">Issuances</button>
+          <button class="sort-btn" onclick="setMvFilter('batch',this)">Batches</button>
+        </div>
+        <div class="card" style="margin:0"><div id="mv-list"></div></div>
+      </div>
+
       <!-- LOGS -->
       <div class="page" id="page-logs">
         <div class="sec-hdr">
@@ -660,7 +717,7 @@ const DOC=doc(FSdb,"neoops","data");
 const BACKUP_DOC=(d)=>doc(FSdb,"neoops","backup_"+d);
 
 // ─── STATE ────────────────────────────────────────────────────────
-let DB={products:[],categories:['Electronics','Clothing','Food','Beverages','Stationery'],departments:[],passwords:{},users:[],logs:[],sales:[],pastInvoices:[],issuances:[],clients:[],orgName:'Organisation',orgMotto:'',orgAddress:'',orgLogo:null,invCounter:0};
+let DB={products:[],categories:['Electronics','Clothing','Food','Beverages','Stationery'],departments:[],passwords:{},users:[],logs:[],sales:[],pastInvoices:[],issuances:[],clients:[],stockMovements:[],orgName:'Organisation',orgMotto:'',orgAddress:'',orgLogo:null,invCounter:0};
 let gSearch='',currentCat='all',currentSort='name',logFilter='all';
 let adminUnlocked=false,dashUnlocked=false,gateResolve=null;
 let currentInvData=null,currentInvNo=null;
@@ -769,7 +826,7 @@ async function initApp(){
     onSnapshot(DOC,(snap)=>{
       if(!snap.exists()||saveTimer)return;
       const remote=snap.data();
-      DB=Object.assign({products:[],categories:[],departments:[],passwords:{},users:[],logs:[],sales:[],pastInvoices:[],issuances:[],clients:[],orgName:'Organisation',orgMotto:'',orgAddress:'',orgLogo:null,invCounter:0},remote);
+      DB=Object.assign({products:[],categories:[],departments:[],passwords:{},users:[],logs:[],sales:[],pastInvoices:[],issuances:[],clients:[],stockMovements:[],orgName:'Organisation',orgMotto:'',orgAddress:'',orgLogo:null,invCounter:0},remote);
       try{localStorage.setItem('neoops_data',JSON.stringify(DB));}catch(_){}
       setSyncUI('ok');
       syncSidebarLogo();
@@ -804,6 +861,13 @@ function addLog(msg,type='info'){
   if(DB.logs.length>500)DB.logs.pop();
 }
 
+// ─── STOCK MOVEMENT ──────────────────────────────────────────────
+function addMovement(kind,type,qty,product,reason){
+  if(!DB.stockMovements)DB.stockMovements=[];
+  DB.stockMovements.unshift({id:uid(),kind,type,qty,product,reason,time:new Date().toISOString(),user:currentUser?currentUser.username:''});
+  if(DB.stockMovements.length>1000)DB.stockMovements.pop();
+}
+
 // ─── NAVIGATION ──────────────────────────────────────────────────
 async function drillTo(section){
   // block dashboard users from admin
@@ -836,7 +900,7 @@ window.goRoot=goRoot;
 function showPageOnly(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  const titles={overview:'OVERVIEW',issuance:'ISSUE STOCK',sales:'SALES',adminproducts:'PRODUCTS',settings:'SETTINGS',archive:'ARCHIVES',invoices:'INVOICES',logs:'ACTIVITY LOG',users:'USERS'};
+  const titles={overview:'OVERVIEW',issuance:'ISSUE STOCK',sales:'SALES',adminproducts:'PRODUCTS',settings:'SETTINGS',archive:'ARCHIVES',invoices:'INVOICES',movement:'STOCK MOVEMENT',logs:'ACTIVITY LOG',users:'USERS'};
   document.getElementById('page-title').textContent=titles[page]||page.toUpperCase();
   renderPage(page);
 }
@@ -856,6 +920,7 @@ function renderPage(p){
   else if(p==='settings')renderSettings();
   else if(p==='archive')renderArchive();
   else if(p==='invoices')renderInvoices();
+  else if(p==='movement')renderMovement();
   else if(p==='logs')renderLogs();
   else if(p==='users')renderUsers();
   else if(p==='organisation')renderSettings(); // fallback for old links
@@ -933,13 +998,9 @@ async function enterAsUser(u){
   currentUser=u;
   document.getElementById('user-login').style.display='none';
   document.getElementById('app').classList.remove('gone');
-  // admin users go to admin, dashboard users go to dashboard
-  if(u.role==='admin'){
-    adminUnlocked=true;
-    await drillTo('admin');
-  } else {
-    await drillTo('dashboard');
-  }
+  // everyone lands on Dashboard first; admins are pre-unlocked so they can still drill into Admin
+  if(u.role==='admin')adminUnlocked=true;
+  await drillTo('dashboard');
   addLog('User logged in: '+u.username,'cyan');
   saveDB();
 }
@@ -1025,9 +1086,9 @@ function openDetail(id){
   document.getElementById('detail-body').innerHTML=h;openOv('detail-ov');
 }
 window.openDetail=openDetail;
-window.addBatch=function(pid){const p=(DB.products||[]).find(x=>x.id===pid);const qty=parseInt(document.getElementById('nb-qty').value);const exp=document.getElementById('nb-exp').value;if(!qty||qty<1)return;if(!p.batches)p.batches=[];p.batches.push({id:uid(),name:fmtBatch(exp),qty,expiry:exp||''});addLog('Batch added to '+p.name+': '+qty+' units','green');saveDB();openDetail(pid);renderCurrentPage();};
-window.promptAddBatch=function(pid,bid){const p=(DB.products||[]).find(x=>x.id===pid);const b=(p.batches||[]).find(x=>x.id===bid);if(!b)return;const v=prompt('Add stock to '+b.name+' ('+p.name+')\nCurrent: '+b.qty+' units\n\nQty to add:');if(v===null)return;const qty=parseInt(v);if(!qty||qty<1){alert('Invalid qty.');return;}b.qty+=qty;addLog('Added '+qty+' units to '+b.name+' of '+p.name,'green');saveDB();openDetail(pid);renderCurrentPage();};
-window.delBatch=function(pid,bid){const p=(DB.products||[]).find(x=>x.id===pid);const b=(p.batches||[]).find(x=>x.id===bid);if(!b)return;if(!confirm('Delete '+b.name+' from '+p.name+'? ('+b.qty+' units)'))return;p.batches=p.batches.filter(x=>x.id!==bid);addLog('Batch removed from '+p.name,'red');saveDB();openDetail(pid);renderCurrentPage();};
+window.addBatch=function(pid){const p=(DB.products||[]).find(x=>x.id===pid);const qty=parseInt(document.getElementById('nb-qty').value);const exp=document.getElementById('nb-exp').value;if(!qty||qty<1)return;if(!p.batches)p.batches=[];p.batches.push({id:uid(),name:fmtBatch(exp),qty,expiry:exp||''});addLog('Batch added to '+p.name+': '+qty+' units','green');addMovement('batch','in',qty,p.name,'New batch added');saveDB();openDetail(pid);renderCurrentPage();};
+window.promptAddBatch=function(pid,bid){const p=(DB.products||[]).find(x=>x.id===pid);const b=(p.batches||[]).find(x=>x.id===bid);if(!b)return;const v=prompt('Add stock to '+b.name+' ('+p.name+')\nCurrent: '+b.qty+' units\n\nQty to add:');if(v===null)return;const qty=parseInt(v);if(!qty||qty<1){alert('Invalid qty.');return;}b.qty+=qty;addLog('Added '+qty+' units to '+b.name+' of '+p.name,'green');addMovement('batch','in',qty,p.name,'Restocked '+b.name);saveDB();openDetail(pid);renderCurrentPage();};
+window.delBatch=function(pid,bid){const p=(DB.products||[]).find(x=>x.id===pid);const b=(p.batches||[]).find(x=>x.id===bid);if(!b)return;if(!confirm('Delete '+b.name+' from '+p.name+'? ('+b.qty+' units)'))return;p.batches=p.batches.filter(x=>x.id!==bid);addLog('Batch removed from '+p.name,'red');addMovement('batch','out',b.qty,p.name,'Batch removed ('+b.name+')');saveDB();openDetail(pid);renderCurrentPage();};
 window.archiveProd=function(id){const p=(DB.products||[]).find(x=>x.id===id);p.archived=true;p.archivedAt=new Date().toISOString();addLog('Archived: '+p.name,'amber');saveDB();closeOv('detail-ov');renderCurrentPage();};
 
 // ─── ADD/EDIT PRODUCT ─────────────────────────────────────────────
@@ -1041,7 +1102,7 @@ window.saveProd=function(){
   const id=document.getElementById('edit-id').value;const name=document.getElementById('f-name').value.trim();if(!name){alert('Enter a product name.');return;}
   const cat=document.getElementById('f-cat').value;const price=parseFloat(document.getElementById('f-cost').value)||0;const retailPrice=roundTo100(parseFloat(document.getElementById('f-retail').value)||0);const reorder=parseInt(document.getElementById('f-reorder').value)||0;const exp=document.getElementById('f-exp').value;const qty=parseInt(document.getElementById('f-qty').value)||0;
   if(id){const p=(DB.products||[]).find(x=>x.id===id);Object.assign(p,{name,category:cat,price,retailPrice,reorder});addLog('Product updated: '+name,'cyan');}
-  else{if(!DB.products)DB.products=[];DB.products.push({id:uid(),name,category:cat,price,retailPrice,reorder,prodDate:document.getElementById('f-prod').value,expiry:exp,batches:qty>0?[{id:uid(),name:fmtBatch(exp),qty,expiry:exp||''}]:[]});addLog('Product created: '+name,'green');}
+  else{if(!DB.products)DB.products=[];DB.products.push({id:uid(),name,category:cat,price,retailPrice,reorder,prodDate:document.getElementById('f-prod').value,expiry:exp,batches:qty>0?[{id:uid(),name:fmtBatch(exp),qty,expiry:exp||''}]:[]});addLog('Product created: '+name,'green');if(qty>0)addMovement('batch','in',qty,name,'Initial stock on creation');}
   saveDB();closeOv('prod-ov');renderCurrentPage();
 };
 
@@ -1080,7 +1141,7 @@ window.doSell=function(){
   DB.sales.unshift({id:uid(),product:p.name,batch:b.name,qty,unitPrice:price,subtotal:qty*price,waybill:wb,client,phone,notes,time:new Date().toISOString(),user:currentUser?currentUser.username:''});
   if(!DB.clients)DB.clients=[];
   const allC=DB.clients.map(c=>typeof c==='string'?{name:c,phone:''}:c);const ex=allC.find(c=>c.name===client);if(ex){if(phone)ex.phone=phone;}else allC.push({name:client,phone:phone||''});DB.clients=allC;
-  addLog('Sale: '+qty+'x '+p.name+' to '+client,'green');saveDB();closeOv('sell-ov');renderCurrentPage();
+  addLog('Sale: '+qty+'x '+p.name+' to '+client,'green');addMovement('sale','out',qty,p.name,'Sold to '+client);saveDB();closeOv('sell-ov');renderCurrentPage();
 };
 window.clientAcFilter=function(){
   const q=(document.getElementById('sell-client')?.value||'').toLowerCase();const drop=document.getElementById('client-drop');if(!drop)return;
@@ -1151,7 +1212,7 @@ window.doIssue=function(){
   const issId=uid();const issTime=new Date().toISOString();const items=[];
   issItems.forEach(item=>{
     const p=(DB.products||[]).find(x=>x.id===item.prodId);const b=(p?.batches||[]).find(x=>x.id===item.batchId);
-    if(p&&b){b.qty-=item.qty;items.push({...item});}
+    if(p&&b){b.qty-=item.qty;items.push({...item});addMovement('issuance','out',item.qty,p.name,'Issued to '+to);}
   });
   if(!DB.issuances)DB.issuances=[];
   DB.issuances.unshift({id:issId,items,to,issuedBy,time:issTime,orgName:DB.orgName||'Organisation'});
@@ -1212,7 +1273,7 @@ function renderSales(){
     return'<div class="card"><div class="card-hdr"><div><div style="font-weight:500">'+client+'</div><div style="font-size:11px;color:var(--text2)">'+items.length+' item(s) · '+fmtP(total)+'</div></div><button class="btn btn-sm" onclick="printGroup(\''+client+'\')">Print Invoice</button></div><table class="tbl"><thead><tr><th>Product</th><th>Batch</th><th>Qty</th><th>Unit</th><th>Subtotal</th><th>Date</th><th>✓</th><th></th></tr></thead><tbody>'+rows+'</tbody></table><div style="margin-top:8px"><button class="btn btn-sm" onclick="printSelected(\''+client+'\')">Print Selected</button></div></div>';
   }).join('');
 }
-window.cancelSale=function(id){if(!confirm('Cancel sale and restore stock?'))return;const s=(DB.sales||[]).find(x=>x.id===id);if(s){const p=(DB.products||[]).find(x=>x.name===s.product);if(p){const b=(p.batches||[]).find(x=>x.name===s.batch);if(b)b.qty+=s.qty;}}DB.sales=(DB.sales||[]).filter(x=>x.id!==id);addLog('Sale cancelled: '+(s?s.product:''),'amber');saveDB();renderSales();renderCurrentPage();};
+window.cancelSale=function(id){if(!confirm('Cancel sale and restore stock?'))return;const s=(DB.sales||[]).find(x=>x.id===id);if(s){const p=(DB.products||[]).find(x=>x.name===s.product);if(p){const b=(p.batches||[]).find(x=>x.name===s.batch);if(b)b.qty+=s.qty;}}DB.sales=(DB.sales||[]).filter(x=>x.id!==id);addLog('Sale cancelled: '+(s?s.product:''),'amber');if(s)addMovement('sale','in',s.qty,s.product,'Sale cancelled (restored)');saveDB();renderSales();renderCurrentPage();};
 window.printGroup=function(client){const items=(DB.sales||[]).filter(s=>s.client===client);if(items.length)showInvoice(items);};
 window.printSelected=function(client){const checked=[...document.querySelectorAll('.sale-chk:checked')].map(c=>c.value);if(!checked.length){alert('Check at least one sale.');return;}showInvoice((DB.sales||[]).filter(s=>checked.includes(s.id)));};
 
@@ -1269,6 +1330,22 @@ function renderLogs(){
   if(!logs.length){el.innerHTML='<div class="empty">no entries</div>';return;}
   const c={cyan:'var(--accent)',green:'var(--accent)',red:'var(--red)',amber:'var(--amber)',info:'var(--text2)'};
   el.innerHTML=logs.map(l=>'<div class="log-item"><div class="log-dot" style="background:'+(c[l.type]||c.info)+'"></div><div style="flex:1"><div style="font-size:12px">'+l.msg+'</div><div style="font-size:10px;color:var(--text3);display:flex;gap:12px"><span>'+fmtT(l.time)+'</span>'+(l.user?'<span style="color:var(--accent)">'+l.user+'</span>':'')+'</div></div></div>').join('');
+}
+
+// ─── STOCK MOVEMENT ──────────────────────────────────────────────
+let mvFilter='all';
+window.setMvFilter=function(f,el){mvFilter=f;document.querySelectorAll('#mv-tabs .sort-btn').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');renderMovement();};
+const MV_KIND_LABEL={sale:'Sale',issuance:'Issuance',batch:'Batch'};
+function renderMovement(){
+  let mv=DB.stockMovements||[];
+  if(mvFilter==='in'||mvFilter==='out')mv=mv.filter(m=>m.type===mvFilter);
+  else if(mvFilter!=='all')mv=mv.filter(m=>m.kind===mvFilter);
+  document.getElementById('mv-count').textContent=mv.length+' entries';
+  const el=document.getElementById('mv-list');
+  if(!mv.length){el.innerHTML='<div class="empty">no stock movement recorded</div>';return;}
+  el.innerHTML='<table class="tbl"><thead><tr><th>Product</th><th>Kind</th><th>Type</th><th>Qty</th><th>Reason</th><th>Date</th><th>User</th></tr></thead><tbody>'
+    +mv.map(m=>'<tr><td style="font-weight:500">'+m.product+'</td><td><span class="badge badge-gray">'+(MV_KIND_LABEL[m.kind]||m.kind)+'</span></td><td><span class="badge '+(m.type==='in'?'badge-green':'badge-red')+'">'+(m.type==='in'?'IN':'OUT')+'</span></td><td style="font-weight:700;color:'+(m.type==='in'?'var(--accent)':'var(--red)')+'">'+(m.type==='in'?'+':'−')+m.qty+'</td><td style="font-size:12px;color:var(--text2)">'+(m.reason||'—')+'</td><td style="font-size:10px;color:var(--text3)">'+fmtT(m.time)+'</td><td style="font-size:11px;color:var(--accent)">'+(m.user||'—')+'</td></tr>').join('')
+    +'</tbody></table>';
 }
 
 // ─── ADMIN › PRODUCTS (Add Product + Query) ──────────────────────
@@ -1540,7 +1617,7 @@ async function manualBackup(){
 window.manualBackup=manualBackup;
 function checkAutoBackup(){const last=localStorage.getItem('neoops_last_backup');const today=new Date().toISOString().slice(0,10);if(last!==today)manualBackup().catch(()=>{});}
 window.exportBackup=function(){const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='neoops-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);addLog('Manual backup exported','cyan');saveDB();};
-window.importBackup=function(){const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const imp=JSON.parse(ev.target.result);if(!imp.products)throw new Error('Invalid backup');if(!confirm('Replace ALL data with this backup?'))return;DB=Object.assign({products:[],categories:[],departments:[],passwords:{},users:[],logs:[],sales:[],pastInvoices:[],issuances:[],clients:[],orgName:'Organisation',orgMotto:'',orgLogo:null,invCounter:0},imp);saveDB();syncSidebarLogo();renderCurrentPage();alert('Restore complete.');}catch(err){alert('Invalid backup: '+err.message);}};r.readAsText(f);};input.click();};
+window.importBackup=function(){const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const imp=JSON.parse(ev.target.result);if(!imp.products)throw new Error('Invalid backup');if(!confirm('Replace ALL data with this backup?'))return;DB=Object.assign({products:[],categories:[],departments:[],passwords:{},users:[],logs:[],sales:[],pastInvoices:[],issuances:[],clients:[],stockMovements:[],orgName:'Organisation',orgMotto:'',orgAddress:'',orgLogo:null,invCounter:0},imp);saveDB();syncSidebarLogo();renderCurrentPage();alert('Restore complete.');}catch(err){alert('Invalid backup: '+err.message);}};r.readAsText(f);};input.click();};
 
 // ─── SEED ────────────────────────────────────────────────────────
 function seedData(){
